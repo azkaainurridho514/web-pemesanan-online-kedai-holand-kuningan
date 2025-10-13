@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Events\OrderEvent;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
+// broadcast(new OrderEvent("dari Azka Ainurridho")); // => show notif
+Route::get('/', [HomeController::class, "index"]);
+Route::get('/order', function(){
+    broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
 });
