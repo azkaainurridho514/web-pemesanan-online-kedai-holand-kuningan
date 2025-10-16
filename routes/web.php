@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Events\OrderEvent;
 
 /*
@@ -18,4 +20,8 @@ use App\Events\OrderEvent;
 Route::get('/', [HomeController::class, "index"]);
 Route::get('/order', function(){
     broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
+});
+Route::prefix('get-data')->group(function () {
+    Route::get('category', [CategoryController::class, "getData"]);
+    Route::get('product', [ProductController::class, 'getData']);
 });
