@@ -8,7 +8,6 @@ use App\Events\OrderEvent;
 class HomeController extends Controller
 {
     public function index(){
-        return view('index');
-        // return view('dashboard.index');
+        return view('cart');
     }
 }

@@ -1,88 +1,43 @@
-@extends('layouts.main-home')
+@extends('layout-home.main')
 
 @section('title', "HOME")
-@push('style-css')
-    <style>
-        body {
-            background-color: #f9fafb;
-            font-family: 'Roboto', sans-serif;
-        }
-        .menu-card {
-            border: none;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-        .menu-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-        }
-        .menu-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #222;
-        }
-        .menu-desc {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        .menu-price {
-            color: #0d6efd;
-            font-weight: 600;
-        }
-        .btn-cart {
-            border-radius: 30px;
-            font-weight: 500;
-            padding: 0.45rem 1rem;
-        }
-        .search-box {
-            max-width: 100%;
-            margin: 0 auto 2rem;
-        }
-  </style>
-@endpush
-@section('main')    
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-4 fw-bold">
-            ✨ Cita Rasa dari <span class="text-primary">Kedai Holand</span>
-        </h2>
-        <p class="text-center text-muted fst-italic mb-5">
-            “Dari dapur kami, untuk selera terbaikmu.”
-        </p>
-        <div class="search-box mb-3">
-            <form class="d-flex justify-content-center" onsubmit="event.preventDefault(); searchMenu();">
-                <div class="input-group">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    class="form-control form-control-lg shadow-sm" 
-                    placeholder="Cari menu makanan..."
-                    aria-label="Cari menu makanan"
-                >
-                <button class="btn btn-primary btn-lg" type="submit">
-                    <i class="bi bi-search me-1"></i> Cari
-                </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="d-flex flex-wrap gap-3 mb-5 justify-content-center" id="categoryList">
-        </div>
-        <div class="row" id="productList">
-
-            
-
+@section('main')
+<div class="row d-flex justify-content-center">
+    <div class="single-footer-widget">
+        <div class="menu-content pb-60">
+            <div class="title text-center">
+                <h1 class="mb-10">What kind of Coffee we serve for you</h1>
+                <p>Who are in extremely love with eco friendly system.</p>
+            </div>
         </div>
     </div>
-  </section>
+</div>						
+<div class="row d-flex justify-content-between mb-4 align-content-center">
+    <div class="single-footer-widget col-md-5 w-full">
+        <div class="" id="mc_embed_signup">
+            <form class="form-inline" onsubmit="event.preventDefault(); searchMenu();">
+                <input class="form-control" id="searchInput" name="search" placeholder="Search..." onfocus="this.placeholder = ''" onblur="this.placeholder = 'Search...'" required="" type="text">
+                <button class="click-btn btn btn-default"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></button>
+                <div style="position: absolute; left: -5000px;">
+                    <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value="" type="text">
+                </div>
+                <div class="info pt-20"></div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="d-flex gap-2 scrollable-row" id="categoryList">
+        </div>
+    </div>
+</div>	
+
+<div class="row" id="productList"></div>
+
 @endsection
 @push('script-js')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-
     function getDataProducts(search = '', category = '') {
         $('#productList').html(`
             <div class="d-flex justify-content-center align-items-center my-5">
@@ -93,7 +48,7 @@ $(document).ready(function() {
         `);
 
         $.ajax({
-            url: '/get-data/product',
+            url: '/api/get-data/product',
             method: 'GET',
             data: { search, category },
             success: function(response) {
@@ -121,18 +76,15 @@ $(document).ready(function() {
         let html = '';
         data.forEach(item => {
             html += `
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                <div class="card menu-card h-100">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <div>
-                            <h5 class="menu-name">${item.name}</h5>
-                            <p class="menu-desc mb-2">${item.description || '-'}</p>
-                            <p class="menu-price mb-0">${item.price}</p>
-                        </div>
-                        <div class="text-end mt-3">
-                            <button class="btn btn-outline-primary btn-cart">+ Keranjang</button>
-                        </div>
-                    </div>
+            <div class="col-lg-4">
+                <div class="single-menu">
+                    <h4 class="mb-2">${item.name}</h4>
+                    <p class="price">
+                        ${item.price}
+                    </p>
+                    <p>
+                        ${item.description || '-'}
+                    </p>								
                 </div>
             </div>`;
         });
@@ -147,7 +99,7 @@ $(document).ready(function() {
         `);
 
         $.ajax({
-            url: '/get-data/category',
+            url: '/api/get-data/category',
             method: 'GET',
             success: function(response) {
                 if (response.success) renderCategories(response.data);
@@ -161,24 +113,20 @@ $(document).ready(function() {
 
     function renderCategories(categories) {
         let html = `
-            <button type="button" class="btn btn-outline-primary active" data-id="">
-                Semua
-            </button>
+            <div class="mx-1 mb-2"><button type="button" class="genric-btn primary-border radius small disable" data-id="">Semua</button></div>
         `;
 
         categories.forEach(cat => {
             html += `
-                <button type="button" class="btn btn-outline-primary" data-id="${cat.id}">
-                    ${cat.name}
-                </button>
+                <div class="mx-1 mb-2"><button type="button" class="genric-btn primary-border radius small" data-id="${cat.id}">${cat.name}</button></div>
             `;
         });
 
         $('#categoryList').html(html);
 
         $('#categoryList button').on('click', function() {
-            $('#categoryList button').removeClass('active');
-            $(this).addClass('active');
+            $('#categoryList button').removeClass('disable');
+            $(this).addClass('disable');
 
             const category = $(this).data('id') || '';
             const search = $('#searchInput').val().trim();
@@ -188,13 +136,13 @@ $(document).ready(function() {
 
     window.searchMenu = function() {
         const search = $('#searchInput').val().trim();
-        const category = $('#categoryList button.active').data('id') || '';
+        const category = $('#categoryList button.disable').data('id') || '';
         getDataProducts(search, category);
     };
 
     $('#searchInput').on('input', function() {
         if ($(this).val().trim() === '') {
-            const category = $('#categoryList button.active').data('id') || '';
+            const category = $('#categoryList button.disable').data('id') || '';
             getDataProducts('', category);
         }
     });

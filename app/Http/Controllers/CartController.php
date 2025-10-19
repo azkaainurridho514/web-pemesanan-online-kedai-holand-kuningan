@@ -15,7 +15,7 @@ class CartController extends Controller
     {
         $cartData = json_decode($request->cookie($this->cookieName), true) ?? [];
         return response()->json($cartData);
-    }
+    }               
 
     public function addOrUpdate(Request $request)
     {
@@ -37,7 +37,7 @@ class CartController extends Controller
                 if ($newItem['desc']) {
                     $item['desc'] = $newItem['desc'];
                 }
-                $item['harga'] = $newItem['harga']; 
+                $item['harga'] = $newItem['harga'];     
                 $found = true;
                 break;
             }

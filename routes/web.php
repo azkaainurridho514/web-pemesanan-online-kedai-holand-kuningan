@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CartController;
 use App\Events\OrderEvent;
 
 /*
@@ -21,7 +22,10 @@ Route::get('/', [HomeController::class, "index"]);
 Route::get('/order', function(){
     broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
 });
-Route::prefix('get-data')->group(function () {
-    Route::get('category', [CategoryController::class, "getData"]);
-    Route::get('product', [ProductController::class, 'getData']);
+
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'view']);
+    Route::post('/add', [CartController::class, 'addOrUpdate']);
+    Route::delete('/remove/{menu_id}', [CartController::class, 'remove']);
+    Route::delete('/clear', [CartController::class, 'clear']);
 });
