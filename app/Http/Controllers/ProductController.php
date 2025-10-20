@@ -11,7 +11,11 @@ class ProductController extends Controller
         $search = $request->search;
         $category = $request->category;
 
-        $query = Product::query()->with('category');
+        $query = Product::query()->with([
+            'category:id,name',
+            'option:id,name',
+            'option.items:id,option_id,name'
+        ]);
         if (!empty($search)) {
             $query->where('name', 'like', '%' . $search . '%');
         }

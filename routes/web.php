@@ -19,12 +19,15 @@ use App\Events\OrderEvent;
 */
 // broadcast(new OrderEvent("dari Azka Ainurridho")); // => show notif
 Route::get('/', [HomeController::class, "index"]);
+Route::get('/cart', [HomeController::class, "cart"]);
 Route::get('/order', function(){
     broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
 });
 
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'view']);
+    Route::get('/data', [CartController::class, 'getData']);
+    Route::get('/history', [CartController::class, 'getHistory']);
     Route::post('/add', [CartController::class, 'addOrUpdate']);
     Route::delete('/remove/{menu_id}', [CartController::class, 'remove']);
     Route::delete('/clear', [CartController::class, 'clear']);

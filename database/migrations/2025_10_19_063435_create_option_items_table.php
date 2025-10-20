@@ -11,17 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('option_items', function (Blueprint $table) {
             $table->uuid('id')->primary(); 
-            $table->uuid('category_id');
-            $table->uuid('option_id')->nullable();
+            $table->uuid('option_id'); 
             $table->string('name');
-            $table->text('description')->nullable();
-            $table->integer('price');
-            $table->boolean('is_available')->default(true);
             $table->timestamps();
         });
-
     }
 
     /**
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('option_items');
     }
 };

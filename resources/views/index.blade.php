@@ -33,17 +33,36 @@
 
 <div class="row" id="productList"></div>
 
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+       
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 @push('script-js')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 $(document).ready(function() {
+
+
     function getDataProducts(search = '', category = '') {
         $('#productList').html(`
-            <div class="d-flex justify-content-center align-items-center my-5">
-                <div class="spinner-border text-secondary" style="width: 4rem; height: 4rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
+            <div class="d-flex justify-content-center align-items-center w-100">
+                <div class="spinner-border text-secondary" role="status" style="width: 4rem; height: 4rem;"></div>
             </div>
         `);
 
@@ -84,17 +103,135 @@ $(document).ready(function() {
                     </p>
                     <p>
                         ${item.description || '-'}
-                    </p>								
+                    </p>
+                    <div class="mx-1 mt-2 d-flex justify-content-end">
+                        <button type="button" class="btn-add genric-btn primary-border radius small" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-option='${JSON.stringify(item.option || {})}' data-toggle="modal" data-target="#modal">Tambah</button>
+                    </div>								
                 </div>
             </div>`;
         });
         $('#productList').html(html);
     }
+    $(document).on('click', '.add-to-cart', function() { 
+        const button = $(this);
+        const hasOption = String(button.data('has-option')) === "true";
+        const product_id = button.data('id'); 
+        const nama = button.data('nama');     
+        const harga = parseInt(String(button.data('harga')).replace(/[^0-9]/g, '')) || 0;   
+        const qty = $('input[name="qty"]').val();
+        const desc = $('input[name="desc"]').val();
+        const option = $('input[name="option_item"]:checked').val() || null;
 
+        // Validasi input
+        if (!qty || qty <= 0) {
+            Swal.fire({
+                title: "Jumlah belum diisi",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        if (hasOption && !option) {
+            Swal.fire({
+                title: "Pilih salah satu opsi terlebih dahulu",
+                icon: "warning",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        // Ambil cookie cart dulu → supaya tahu ada data sebelumnya atau tidak
+        $.getJSON('/cart/data', function (cartResponse) {
+            // Kirim ke controller addOrUpdate
+            $.ajax({
+                url: '/cart/add',
+                method: 'POST',
+                data: {
+                    product_id: product_id,
+                    nama: nama,
+                    qty: qty,
+                    harga: harga,
+                    desc: desc || option || "", 
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (res) {
+                    Swal.fire({
+                        title: res.message,
+                        icon: "success",
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                    console.log('Cart updated:', res.cart);
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire({
+                        title: "Terjadi kesalahan",
+                        text: "Gagal menambahkan ke keranjang",
+                        icon: "error"
+                    });
+                }
+            });
+        });
+    });
+    
+    $(document).on('click', '.btn-add', function() {
+        const productName = $(this).data('name');
+        const option = $(this).data('option'); 
+        const productId = $(this).data('id');
+        const productPrice = $(this).data('price');
+        $('#modalLabel').text(productName);
+
+        let optionHtml = '';
+        if (option && option.items && option.items.length > 0) {
+            optionHtml += `
+            <div class="single-input-primary mb-2">
+                <div class="d-flex align-items-center flex-wrap">`;
+
+            option.items.forEach(item => {
+                optionHtml += `
+                    <div class="form-check d-flex align-items-center px-3">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="option_item"
+                            id="option_${item.id}"
+                            value="${item.name}"
+                            style="accent-color: #B68834;"
+                        >
+                        <label class="form-check-label ms-1" for="option_${item.id}">
+                            ${item.name}
+                        </label>
+                    </div>`;
+            });
+
+            optionHtml += `
+                </div>
+            </div>`;
+        }
+
+        $('.modal-body').html(`
+            <input type="number" name="qty" placeholder="Jumlah" required class="single-input-primary mb-2">
+            ${optionHtml}
+            <input type="text" name="desc" placeholder="Catatan" class="single-input-primary">
+        `);
+
+        $('.modal-footer').html(`
+             <button type="button" class="genric-btn danger radius medium" data-dismiss="modal">Close</button>
+            <button type="button" class="genric-btn primary radius medium add-to-cart" 
+                data-id="${productId}"
+                data-nama="${productName}"
+                data-harga="${productPrice}"
+                data-has-option="${option && option.items && option.items.length > 0}">
+                Simpan
+            </button>
+        `);
+    });
     function getCategories() {
         $('#categoryList').html(`
-            <div class="spinner-border text-primary my-3" role="status">
-                <span class="visually-hidden">Loading...</span>
+            <div class="d-flex justify-content-center align-items-center w-100">
+                <div class="spinner-border text-secondary" role="status"></div>
             </div>
         `);
 

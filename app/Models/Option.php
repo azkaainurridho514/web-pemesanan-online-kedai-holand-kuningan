@@ -4,20 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
-class Product extends Model
+class Option extends Model
 {
     use HasFactory;
     public $incrementing = false;
     protected $keyType = 'string';
     protected $fillable = [
-        'category_id',
-        'option_id',
         'name',
-        'description',
-        'price',
-        'is_available',
     ];
     protected static function boot()
     {
@@ -29,12 +23,8 @@ class Product extends Model
             }
         });
     }
-    public function category()
+    public function items()
     {
-        return $this->belongsTo(Category::class, 'category_id', 'id');
-    }
-    public function option()
-    {
-        return $this->belongsTo(Option::class, 'option_id', 'id');
+        return $this->hasMany(OptionItems::class, 'option_id', 'id');
     }
 }

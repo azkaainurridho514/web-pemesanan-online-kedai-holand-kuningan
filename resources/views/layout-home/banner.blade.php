@@ -7,7 +7,10 @@
                     Start your day with <br>
                     a black Coffee				
                 </h1>
-                {{-- <a href="#" class="primary-btn text-uppercase">Buy Now</a> --}}
+                <a href="/cart" class="primary-btn text-uppercase">
+                    Cart
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </a>
             </div>											
         </div>
     </div>
