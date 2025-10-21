@@ -5,6 +5,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Events\OrderEvent;
 
 /*
@@ -22,6 +24,11 @@ Route::get('/', [HomeController::class, "index"]);
 Route::get('/cart', [HomeController::class, "cart"]);
 Route::get('/order', function(){
     broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
+});
+
+Route::get('/login-admin', [AuthController::class, 'index']);
+Route::prefix('admin')->group(function(){
+    Route::get('dashboard', [DashboardController::class, 'index']);
 });
 
 Route::prefix('cart')->group(function () {

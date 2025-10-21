@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layout-dashboard.main')
 @section('title', "Kedai Holand | Dashboard")    
 @section('title-page', "Dashboard")    
 @section('main')
@@ -6,7 +6,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">YO BRO</h5>
+                    <h5 class="card-title mb-0">Dashboard</h5>
                 </div>
                 <div class="card-body">
                 </div>

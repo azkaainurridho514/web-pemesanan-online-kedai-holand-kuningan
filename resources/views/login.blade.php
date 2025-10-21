@@ -1,4 +1,4 @@
-@extends('layouts.main-auth')
+@extends('layout-dashboard.main-auth')
 @section('main')
 	<main class="d-flex w-100">
 		<div class="container d-flex flex-column">
