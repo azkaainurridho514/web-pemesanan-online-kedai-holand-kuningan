@@ -16,7 +16,9 @@
 		<title>@yield('title')</title>
 
 		<link href="{{ asset("adminkit-dev-old/static/css/app.css") }}" rel="stylesheet">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+		@vite('resources/css/app.css')
 	</head>
 
 	<body>
@@ -34,7 +36,24 @@
 				@include('layout-dashboard.footer')
 			</div>
 		</div>
-
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 		<script src="{{ asset("adminkit-dev-old/static/js/app.js") }}"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				Echo.channel(`order-event`)
+				.listen('OrderEvent', (e) => {
+					Swal.fire({
+						icon: e.icon,
+						title: e.title,
+						text: e.text,
+						showConfirmButton: false
+					});
+				});
+			});
+		</script>
+
+		@stack('script')
+		@vite('resources/js/app.js')
 	</body>
 </html>

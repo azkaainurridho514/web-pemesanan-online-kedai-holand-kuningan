@@ -139,17 +139,5 @@
         </div>
         @vite('resources/js/app.js')
     </body>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Echo.channel(`order-event`)
-            .listen('OrderEvent', (e) => {
-                  Swal.fire({
-                    icon: e.icon,
-                    title: e.title,
-                    text: e.text,
-                    showConfirmButton: false
-                });
-            });
-        });
-    </script>
+    
 </html>

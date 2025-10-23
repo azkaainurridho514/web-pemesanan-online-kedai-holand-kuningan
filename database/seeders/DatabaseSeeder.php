@@ -136,93 +136,93 @@ class DatabaseSeeder extends Seeder
         });
 
         // 🧾 Pesanan Dummy
-        for ($i = 1; $i <= 5; $i++) {
-            $order = Order::create([
-                'id' => Str::uuid(),
-                'order_code' => 'ORD-' . strtoupper(Str::random(6)),
-                'name' => fake()->name(),
-                'phone' => fake()->phoneNumber(),
-                'table_number' => 'T' . rand(1, 10),
-                'total_price' => 0,
-                'payment_method' => fake()->randomElement(['cash', 'transfer']),
-                'status' => 'menunggu',
-                'completed_at' => null,
-            ]);
+        // for ($i = 1; $i <= 5; $i++) {
+        //     $order = Order::create([
+        //         'id' => Str::uuid(),
+        //         'order_code' => 'ORD-' . strtoupper(Str::random(6)),
+        //         'name' => fake()->name(),
+        //         'phone' => fake()->phoneNumber(),
+        //         'table_number' => 'T' . rand(1, 10),
+        //         'total_price' => 0,
+        //         'payment_method' => fake()->randomElement(['cash', 'transfer']),
+        //         'status' => 'menunggu',
+        //         'completed_at' => null,
+        //     ]);
 
-            $itemCount = rand(3, 5);
-            $total = 0;
+        //     $itemCount = rand(3, 5);
+        //     $total = 0;
 
-            for ($j = 0; $j < $itemCount; $j++) {
-                $product = $products->random();
-                $qty = rand(1, 3);
-                $subtotal = $product->price * $qty;
-                $total += $subtotal;
+        //     for ($j = 0; $j < $itemCount; $j++) {
+        //         $product = $products->random();
+        //         $qty = rand(1, 3);
+        //         $subtotal = $product->price * $qty;
+        //         $total += $subtotal;
 
-                OrderItem::create([
-                    'id' => Str::uuid(),
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $qty,
-                    'subtotal' => $subtotal,
-                    'note' => fake()->optional()->sentence(),
-                ]);
-            }
+        //         OrderItem::create([
+        //             'id' => Str::uuid(),
+        //             'order_id' => $order->id,
+        //             'product_id' => $product->id,
+        //             'quantity' => $qty,
+        //             'subtotal' => $subtotal,
+        //             'note' => fake()->optional()->sentence(),
+        //         ]);
+        //     }
 
-            $order->update(['total_price' => $total]);
+        //     $order->update(['total_price' => $total]);
 
-            OrderLog::create([
-                'id' => Str::uuid(),
-                'order_id' => $order->id,
-                'status' => 'menunggu',
-                'message' => 'Pesanan baru dibuat dan menunggu diproses.',
-            ]);
-        }
+        //     OrderLog::create([
+        //         'id' => Str::uuid(),
+        //         'order_id' => $order->id,
+        //         'status' => 'menunggu',
+        //         'message' => 'Pesanan baru dibuat dan menunggu diproses.',
+        //     ]);
+        // }
     }
-    public function order(Request $request)
-    {
-        $validated = $request->validate([
-            'name'  => 'required|string|max:100',
-            'phone' => 'required|string|max:20',
-        ]);
+    // public function order(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name'  => 'required|string|max:100',
+    //         'phone' => 'required|string|max:20',
+    //     ]);
 
-        $cart = json_decode($request->cookie($this->cookieName), true) ?? [];
+    //     $cart = json_decode($request->cookie($this->cookieName), true) ?? [];
 
-        if (empty($cart)) {
-            return response()->json(['message' => 'Keranjang kosong'], 400);
-        }
+    //     if (empty($cart)) {
+    //         return response()->json(['message' => 'Keranjang kosong'], 400);
+    //     }
 
-        $itemsToOrder = array_filter($cart, fn($item) => empty($item['is_order']) || $item['is_order'] === false);
+    //     $itemsToOrder = array_filter($cart, fn($item) => empty($item['is_order']) || $item['is_order'] === false);
 
-        if (empty($itemsToOrder)) {
-            return response()->json(['message' => 'Tidak ada item baru untuk dipesan'], 400);
-        }
+    //     if (empty($itemsToOrder)) {
+    //         return response()->json(['message' => 'Tidak ada item baru untuk dipesan'], 400);
+    //     }
 
-        foreach ($itemsToOrder as $item) {
-            \DB::table('orders')->insert([
-                'name'       => $validated['name'],
-                'phone'      => $validated['phone'],
-                'product_id' => $item['product_id'],
-                'nama'       => $item['nama'],
-                'qty'        => $item['qty'],
-                'harga'      => $item['harga'],
-                'desc'       => $item['desc'] ?? '',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+    //     foreach ($itemsToOrder as $item) {
+    //         \DB::table('orders')->insert([
+    //             'name'       => $validated['name'],
+    //             'phone'      => $validated['phone'],
+    //             'product_id' => $item['product_id'],
+    //             'nama'       => $item['nama'],
+    //             'qty'        => $item['qty'],
+    //             'harga'      => $item['harga'],
+    //             'desc'       => $item['desc'] ?? '',
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+    //     }
 
-        foreach ($cart as &$item) {
-            if (in_array($item, $itemsToOrder)) {
-                $item['is_order'] = true;
-            }
-        }
+    //     foreach ($cart as &$item) {
+    //         if (in_array($item, $itemsToOrder)) {
+    //             $item['is_order'] = true;
+    //         }
+    //     }
 
-        $cookie = cookie($this->cookieName, json_encode($cart), $this->cookieTime);
+    //     $cookie = cookie($this->cookieName, json_encode($cart), $this->cookieTime);
 
-        return response()->json([
-            'message' => 'Pesanan berhasil disimpan!',
-            'ordered_count' => count($itemsToOrder),
-        ])->cookie($cookie);
-    }
+    //     return response()->json([
+    //         'message' => 'Pesanan berhasil disimpan!',
+    //         'ordered_count' => count($itemsToOrder),
+    //     ])->cookie($cookie);
+    // }
 
 }

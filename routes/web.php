@@ -6,6 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
 use App\Events\OrderEvent;
 
@@ -22,13 +24,18 @@ use App\Events\OrderEvent;
 // broadcast(new OrderEvent("dari Azka Ainurridho")); // => show notif
 Route::get('/', [HomeController::class, "index"]);
 Route::get('/cart', [HomeController::class, "cart"]);
-Route::get('/order', function(){
-    broadcast(new OrderEvent('info',"ADA PESANAN","Pesanan masuk dari mamank garox"));
-});
+Route::post('/broadcast-order', [OrderController::class, 'sendOrderEvent']);
 
 Route::get('/login-admin', [AuthController::class, 'index']);
 Route::prefix('admin')->group(function(){
     Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('header', [HomeController::class, 'headerView']);
+    Route::get('footer', [HomeController::class, 'footerView']);
+    Route::get('order', [OrderController::class, 'orderView']);
+    Route::get('cashier', [OrderController::class, 'cashierView']);
+    Route::get('menu', [MenuController::class, 'menuView']);
+    Route::get('category', [MenuController::class, 'categoryView']);
+    Route::get('option', [MenuController::class, 'optionView']);
 });
 
 Route::prefix('cart')->group(function () {
@@ -36,6 +43,11 @@ Route::prefix('cart')->group(function () {
     Route::get('/data', [CartController::class, 'getData']);
     Route::get('/history', [CartController::class, 'getHistory']);
     Route::post('/add', [CartController::class, 'addOrUpdate']);
+    Route::post('/checkout', [CartController::class, 'placeOrder']);
     Route::delete('/remove/{menu_id}', [CartController::class, 'remove']);
     Route::delete('/clear', [CartController::class, 'clear']);
+});
+Route::prefix('order')->group(function () {
+    Route::get('/data', [OrderController::class, 'dataOrder']);
+    Route::get('/data/info', [OrderController::class, 'dataOrderInfo']);
 });

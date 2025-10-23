@@ -95,7 +95,7 @@ $(document).ready(function() {
         let html = '';
         data.forEach(item => {
             html += `
-            <div class="col-lg-4">
+            <div class="col-md-4">
                 <div class="single-menu">
                     <h4 class="mb-2">${item.name}</h4>
                     <p class="price">
@@ -122,7 +122,6 @@ $(document).ready(function() {
         const desc = $('input[name="desc"]').val();
         const option = $('input[name="option_item"]:checked').val() || null;
 
-        // Validasi input
         if (!qty || qty <= 0) {
             Swal.fire({
                 title: "Jumlah belum diisi",
@@ -141,9 +140,7 @@ $(document).ready(function() {
             return;
         }
 
-        // Ambil cookie cart dulu → supaya tahu ada data sebelumnya atau tidak
         $.getJSON('/cart/data', function (cartResponse) {
-            // Kirim ke controller addOrUpdate
             $.ajax({
                 url: '/cart/add',
                 method: 'POST',
@@ -156,6 +153,7 @@ $(document).ready(function() {
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (res) {
+                    $('#modal').modal('hide');
                     Swal.fire({
                         title: res.message,
                         icon: "success",
@@ -218,7 +216,7 @@ $(document).ready(function() {
         `);
 
         $('.modal-footer').html(`
-             <button type="button" class="genric-btn danger radius medium" data-dismiss="modal">Close</button>
+            <button type="button" class="genric-btn danger radius medium" data-dismiss="modal">Close</button>
             <button type="button" class="genric-btn primary radius medium add-to-cart" 
                 data-id="${productId}"
                 data-nama="${productName}"

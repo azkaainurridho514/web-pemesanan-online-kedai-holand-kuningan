@@ -15,6 +15,8 @@
 		<meta charset="UTF-8">
 		<!-- Site Title -->
 		<title>@yield('title')</title>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
 		<link href="https://fonts.googleapis.com/css?family=Poppins:100,200,400,300,500,600,700" rel="stylesheet"> 
         <!--
@@ -63,6 +65,13 @@
         <script src="{{ asset('coffee/js/mail-script.js')}}"></script>	
         <script src="{{ asset('coffee/js/main.js')}}"></script>	
         @stack('script-js')
+        <script>
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+        </script>
         @vite('resources/js/app.js')
 	</body>
 </html>

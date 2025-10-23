@@ -112,7 +112,6 @@ class CartController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'table_number' => 'required|string|max:20',
-            'payment_method' => 'required|in:cash,transfer',
         ]);
 
         $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
@@ -140,7 +139,7 @@ class CartController extends Controller
             'phone' => $request->phone,
             'table_number' => $request->table_number,
             'total_price' => $totalPrice,
-            'payment_method' => $request->payment_method,
+            'payment_method' => "cash",
             'status' => 'menunggu',
         ]);
 
@@ -188,6 +187,9 @@ class CartController extends Controller
                 $cart = $order['cart'] ?? [];
 
                 $count = count($cart);
+                $count_item = collect($cart)->sum(function ($item) {
+                    return (int) preg_replace('/\D/', '', (string) ($item['qty'] ?? 0));
+                });
                 $total = collect($cart)->sum(function ($item) {
                     $harga = (int) preg_replace('/[^0-9]/', '', $item['harga']);
                     return $harga * (int) $item['qty'];
@@ -196,11 +198,13 @@ class CartController extends Controller
                 return [
                     'is_order'   => true,
                     'count'      => $count,
+                    'count_item' => $count_item,
                     'total'      => $total,
                     'order_code' => $order['order_code'] ?? '',
                     'date'       => $order['date'] ?? '', 
                 ];
             })
+            ->sortByDesc('date')
             ->values()
             ->toArray();
 
