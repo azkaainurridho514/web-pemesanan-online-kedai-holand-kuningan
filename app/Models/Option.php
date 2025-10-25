@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Option extends Model
 {
@@ -26,5 +27,9 @@ class Option extends Model
     public function items()
     {
         return $this->hasMany(OptionItems::class, 'option_id', 'id');
+    }
+    public function product()
+    {
+        return $this->hasMany(Product::class, 'option_id', 'id');
     }
 }

@@ -50,4 +50,6 @@ Route::prefix('cart')->group(function () {
 Route::prefix('order')->group(function () {
     Route::get('/data', [OrderController::class, 'dataOrder']);
     Route::get('/data/info', [OrderController::class, 'dataOrderInfo']);
+    Route::get('/{id}', [OrderController::class, 'show']);
+    Route::put('/{id}/status', [OrderController::class, 'updateStatus']);
 });

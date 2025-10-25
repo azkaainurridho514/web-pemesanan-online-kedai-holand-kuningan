@@ -29,12 +29,39 @@ class OrderController extends Controller
         ]);
     }
     public function dataOrder(Request $request){
-        $orders = Order::orderBy('created_at', 'desc')->paginate(15); 
+        $search = $request->query('search');
+        $status = $request->query('status');
+        $query = Order::query();
+        
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('table_number', 'like', "%{$search}%")
+                ->orWhere('payment_method', 'like', "%{$search}%");
+            });
+        }
+        if (!empty($status) && $status !== 'all') {
+            $query->where('status', $status);
+        }
+        $orders = $query->orderBy('created_at', 'desc')->paginate(15);
         return response()->json($orders);
-        // $orders = Order::latest()->get();
-        // return response()->json([
-        //     "data" => $orders,
-        // ]);
     }
+
+    public function show($id)
+    {
+        $order = Order::with('orderItems.product')->findOrFail($id);
+        return response()->json($order);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|string']);
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
+
+        return response()->json(['message' => 'Status berhasil diperbarui']);
+    }
+
     
 }

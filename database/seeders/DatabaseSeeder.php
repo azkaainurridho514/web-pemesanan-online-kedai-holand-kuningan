@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Order;
@@ -20,38 +21,77 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         // 👤 Admin Default
         User::factory()->create([
-            'name' => 'Admin Kedai Holand satu',
-            'email' => 'adminkedaiholandsatu@gmail.com',
+            'name' => 'Admin Kedai Holand',
+            'email' => 'adminkedaiholand@gmail.com',
             'password' => 'kedaiholand123',
         ]);
 
-        // 🍱 Kategori
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Category::truncate();
+        Option::truncate();
+        OptionItems::truncate();
+        Product::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $categories = collect([
-            ['name' => 'Makanan', 'description' => 'Aneka makanan utama'],
-            ['name' => 'Minuman', 'description' => 'Minuman dingin dan hangat'],
-            ['name' => 'Dessert', 'description' => 'Makanan penutup dan camilan'],
+            ['name' => 'Makanan', 'description' => 'Aneka makanan utama dan lauk.'],
+            ['name' => 'Minuman', 'description' => 'Minuman segar dan panas.'],
+            ['name' => 'Dessert', 'description' => 'Makanan penutup manis.'],
+            ['name' => 'Snack', 'description' => 'Cemilan ringan untuk santai.'],
+            ['name' => 'Kopi', 'description' => 'Berbagai racikan kopi.'],
         ])->map(fn($data) => Category::create([
             'id' => Str::uuid(),
             ...$data
         ]));
 
-        // 🧊 Opsi Suhu (dipakai hanya untuk beberapa minuman)
-        $optionTemperature = Option::create([
-            'id' => Str::uuid(),
-            'name' => 'Suhu Minuman',
-        ]);
+        $optionSets = [
+            'Makanan' => [
+                'Level Pedas' => ['Tidak Pedas', 'Sedang', 'Pedas', 'Super Pedas'],
+                'Ukuran Porsi' => ['Kecil', 'Sedang', 'Besar'],
+            ],
+            'Minuman' => [
+                'Suhu' => ['Dingin', 'Normal', 'Panas'],
+                'Gula' => ['Tanpa Gula', 'Sedikit Gula', 'Manis'],
+            ],
+            'Dessert' => [
+                'Topping' => ['Coklat', 'Keju', 'Stroberi', 'Kacang'],
+                'Ukuran' => ['Mini', 'Reguler'],
+            ],
+            'Snack' => [
+                'Rasa' => ['Asin', 'Pedas', 'Barbeque', 'Keju'],
+                'Kemasan' => ['Kecil', 'Sedang', 'Besar'],
+            ],
+            'Kopi' => [
+                'Kafein' => ['Normal', 'Decaf'],
+                'Gula' => ['Tanpa Gula', 'Manis'],
+                'Suhu' => ['Panas', 'Dingin'],
+            ],
+        ];
 
-        $optionItemsTemperature = collect(['Dingin', 'Panas', 'Normal'])->map(fn($item) =>
-            OptionItems::create([
-                'id' => Str::uuid(),
-                'option_id' => $optionTemperature->id,
-                'name' => $item,
-            ])
-        );
+        $options = collect();
+        foreach ($optionSets as $categoryName => $opts) {
+            foreach ($opts as $optName => $items) {
+                $option = Option::create([
+                    'id' => Str::uuid(),
+                    'name' => $optName,
+                ]);
 
-        // 🍔 Produk (lengkap seperti seeder kamu sebelumnya)
+                foreach ($items as $item) {
+                    OptionItems::create([
+                        'id' => Str::uuid(),
+                        'option_id' => $option->id,
+                        'name' => $item,
+                    ]);
+                }
+
+                $options->push([
+                    'category' => $categoryName,
+                    'option' => $option,
+                ]);
+            }
+        }
+
         $products = collect([
             // === MAKANAN ===
             ['Nasi Goreng Spesial', 25000, 'Makanan'],
@@ -65,12 +105,15 @@ class DatabaseSeeder extends Seeder
             ['Bakso Urat Pedas', 20000, 'Makanan'],
             ['Mie Ayam Pangsit', 22000, 'Makanan'],
             ['Lontong Sayur Medan', 20000, 'Makanan'],
-            ['Nasi Goreng Seafood', 27000, 'Makanan'],
-            ['Ayam Penyet Sambal Ijo', 25000, 'Makanan'],
-            ['Nasi Goreng Kampung', 23000, 'Makanan'],
             ['Spaghetti Bolognese', 28000, 'Makanan'],
             ['Chicken Katsu Rice', 27000, 'Makanan'],
             ['Steak Sapi Lada Hitam', 35000, 'Makanan'],
+            ['Rawon Daging Sapi', 30000, 'Makanan'],
+            ['Gudeg Jogja Komplit', 32000, 'Makanan'],
+            ['Nasi Liwet Solo', 27000, 'Makanan'],
+            ['Ayam Betutu Bali', 33000, 'Makanan'],
+            ['Tongseng Kambing', 34000, 'Makanan'],
+            ['Ikan Bakar Jimbaran', 36000, 'Makanan'],
 
             // === MINUMAN ===
             ['Es Teh Manis', 8000, 'Minuman'],
@@ -84,12 +127,15 @@ class DatabaseSeeder extends Seeder
             ['Jus Alpukat', 17000, 'Minuman'],
             ['Jus Jambu Merah', 15000, 'Minuman'],
             ['Air Mineral', 6000, 'Minuman'],
-            ['Kopi Latte', 18000, 'Minuman'],
             ['Es Kopi Susu Gula Aren', 20000, 'Minuman'],
             ['Matcha Latte', 19000, 'Minuman'],
             ['Teh Tarik Panas', 12000, 'Minuman'],
             ['Coklat Panas', 13000, 'Minuman'],
             ['Americano', 16000, 'Minuman'],
+            ['Es Kelapa Muda', 12000, 'Minuman'],
+            ['Es Lemon Mint', 13000, 'Minuman'],
+            ['Jus Nanas Segar', 14000, 'Minuman'],
+            ['Es Milo Dingin', 15000, 'Minuman'],
 
             // === DESSERT ===
             ['Brownies Coklat', 15000, 'Dessert'],
@@ -108,121 +154,81 @@ class DatabaseSeeder extends Seeder
             ['Red Velvet Cake', 21000, 'Dessert'],
             ['Macaron Mix', 22000, 'Dessert'],
             ['Pudding Mangga', 12000, 'Dessert'],
-        ])->map(function ($data) use ($categories, $optionTemperature) {
+            ['Crepe Coklat Pisang', 16000, 'Dessert'],
+            ['Cupcake Vanilla', 13000, 'Dessert'],
+            ['Donat Keju Lumer', 11000, 'Dessert'],
+            ['Lava Cake Coklat', 19000, 'Dessert'],
+
+            // === SNACK ===
+            ['Keripik Singkong Balado', 10000, 'Snack'],
+            ['Kentang Goreng', 15000, 'Snack'],
+            ['Tahu Crispy', 12000, 'Snack'],
+            ['Tempe Mendoan', 10000, 'Snack'],
+            ['Cireng Isi Ayam', 12000, 'Snack'],
+            ['Risol Mayo', 13000, 'Snack'],
+            ['Sosis Goreng', 14000, 'Snack'],
+            ['Popcorn Caramel', 10000, 'Snack'],
+            ['Pisang Goreng Keju', 14000, 'Snack'],
+            ['Onion Ring', 15000, 'Snack'],
+            ['Keripik Kentang Asin', 9000, 'Snack'],
+            ['Donat Mini', 10000, 'Snack'],
+            ['Martabak Mini', 12000, 'Snack'],
+            ['Tahu Walik Pedas', 13000, 'Snack'],
+            ['Roti Sobek Coklat', 13000, 'Snack'],
+            ['Keripik Pisang Coklat', 11000, 'Snack'],
+            ['Bakwan Sayur Renyah', 10000, 'Snack'],
+            ['Sempol Ayam', 12000, 'Snack'],
+            ['Kentang Spiral', 14000, 'Snack'],
+            ['Singkong Keju', 13000, 'Snack'],
+
+            // === KOPI ===
+            ['Espresso', 15000, 'Kopi'],
+            ['Latte', 18000, 'Kopi'],
+            ['Cappuccino Kopi', 18000, 'Kopi'],
+            ['Americano Kopi', 16000, 'Kopi'],
+            ['Kopi Susu Aren', 20000, 'Kopi'],
+            ['Mocca Latte', 19000, 'Kopi'],
+            ['Caramel Macchiato', 21000, 'Kopi'],
+            ['Cold Brew', 22000, 'Kopi'],
+            ['Kopi Vietnam Drip', 20000, 'Kopi'],
+            ['Affogato', 23000, 'Kopi'],
+            ['Kopi Tubruk Bali', 16000, 'Kopi'],
+            ['Flat White', 18000, 'Kopi'],
+            ['Piccolo Latte', 17000, 'Kopi'],
+            ['Irish Coffee', 24000, 'Kopi'],
+            ['Hazelnut Latte', 20000, 'Kopi'],
+            ['Vanilla Latte', 19000, 'Kopi'],
+            ['Long Black', 17000, 'Kopi'],
+            ['Cortado', 18000, 'Kopi'],
+            ['Kopi Luwak Premium', 50000, 'Kopi'],
+            ['Frappuccino', 22000, 'Kopi'],
+        ]);
+
+        $products = $products->shuffle();
+
+        $noOptionProducts = $products->random(22);
+
+        foreach ($products as $data) {
             $category = $categories->firstWhere('name', $data[2]);
-            $optionId = null;
+            $option_id = $noOptionProducts->contains($data)
+                ? null
+                : $options->where('category', $data[2])->pluck('option')->random()->id;
 
-            // produk yang punya opsi suhu
-            $withOption = [
-                'Es Teh Manis', 'Es Jeruk Segar', 'Kopi Hitam Tubruk',
-                'Cappuccino', 'Lemon Tea Dingin', 'Air Mineral',
-                'Kopi Latte', 'Es Kopi Susu Gula Aren', 'Matcha Latte',
-                'Teh Tarik Panas', 'Coklat Panas', 'Americano'
-            ];
-
-            if (in_array($data[0], $withOption)) {
-                $optionId = $optionTemperature->id;
-            }
-
-            return Product::create([
+            Product::create([
                 'id' => Str::uuid(),
                 'category_id' => $category->id,
-                'option_id' => $optionId, // boleh null
+                'option_id' => $option_id,
                 'name' => $data[0],
                 'description' => fake()->sentence(),
                 'price' => $data[1],
                 'is_available' => true,
             ]);
-        });
+        }
 
-        // 🧾 Pesanan Dummy
-        // for ($i = 1; $i <= 5; $i++) {
-        //     $order = Order::create([
-        //         'id' => Str::uuid(),
-        //         'order_code' => 'ORD-' . strtoupper(Str::random(6)),
-        //         'name' => fake()->name(),
-        //         'phone' => fake()->phoneNumber(),
-        //         'table_number' => 'T' . rand(1, 10),
-        //         'total_price' => 0,
-        //         'payment_method' => fake()->randomElement(['cash', 'transfer']),
-        //         'status' => 'menunggu',
-        //         'completed_at' => null,
-        //     ]);
+        Product::inRandomOrder()->limit(25)->update(['is_available' => false]);
 
-        //     $itemCount = rand(3, 5);
-        //     $total = 0;
+        echo "Seeder sukses: urutan produk diacak, 22 tanpa opsi, 25 non-available ✅\n";
 
-        //     for ($j = 0; $j < $itemCount; $j++) {
-        //         $product = $products->random();
-        //         $qty = rand(1, 3);
-        //         $subtotal = $product->price * $qty;
-        //         $total += $subtotal;
 
-        //         OrderItem::create([
-        //             'id' => Str::uuid(),
-        //             'order_id' => $order->id,
-        //             'product_id' => $product->id,
-        //             'quantity' => $qty,
-        //             'subtotal' => $subtotal,
-        //             'note' => fake()->optional()->sentence(),
-        //         ]);
-        //     }
-
-        //     $order->update(['total_price' => $total]);
-
-        //     OrderLog::create([
-        //         'id' => Str::uuid(),
-        //         'order_id' => $order->id,
-        //         'status' => 'menunggu',
-        //         'message' => 'Pesanan baru dibuat dan menunggu diproses.',
-        //     ]);
-        // }
     }
-    // public function order(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'name'  => 'required|string|max:100',
-    //         'phone' => 'required|string|max:20',
-    //     ]);
-
-    //     $cart = json_decode($request->cookie($this->cookieName), true) ?? [];
-
-    //     if (empty($cart)) {
-    //         return response()->json(['message' => 'Keranjang kosong'], 400);
-    //     }
-
-    //     $itemsToOrder = array_filter($cart, fn($item) => empty($item['is_order']) || $item['is_order'] === false);
-
-    //     if (empty($itemsToOrder)) {
-    //         return response()->json(['message' => 'Tidak ada item baru untuk dipesan'], 400);
-    //     }
-
-    //     foreach ($itemsToOrder as $item) {
-    //         \DB::table('orders')->insert([
-    //             'name'       => $validated['name'],
-    //             'phone'      => $validated['phone'],
-    //             'product_id' => $item['product_id'],
-    //             'nama'       => $item['nama'],
-    //             'qty'        => $item['qty'],
-    //             'harga'      => $item['harga'],
-    //             'desc'       => $item['desc'] ?? '',
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ]);
-    //     }
-
-    //     foreach ($cart as &$item) {
-    //         if (in_array($item, $itemsToOrder)) {
-    //             $item['is_order'] = true;
-    //         }
-    //     }
-
-    //     $cookie = cookie($this->cookieName, json_encode($cart), $this->cookieTime);
-
-    //     return response()->json([
-    //         'message' => 'Pesanan berhasil disimpan!',
-    //         'ordered_count' => count($itemsToOrder),
-    //     ])->cookie($cookie);
-    // }
-
 }

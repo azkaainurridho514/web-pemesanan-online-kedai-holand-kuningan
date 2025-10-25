@@ -78,44 +78,104 @@
 <div class="card flex-fill w-100">
     <div class="card flex-fill">
         <div class="card-header">
-            <h5 class="card-title mb-0">Orders</h5>
+            <div class="card-title d-flex mb-3 mt-3 gap-2">
+                <div class="col-lg-6">
+                    <select id="filterStatus" class="form-select" style="max-width: 180px;">
+                        <option value="">Semua Status</option>
+                        <option value="menunggu">Menunggu</option>
+                        <option value="diproses">Diproses</option>
+                        <option value="dihidangkan">Dihidangkan</option>
+                        <option value="selesai">Selesai</option>
+                        <option value="batal">Batal</option>
+                    </select>
+                </div>
+                <div class="col-lg-6 d-flex gap-2">
+                    <input type="text" id="search" class="form-control" placeholder="Cari nama / meja / metode...">
+                    <button id="btnSearch" class="col-lg-2 btn btn-primary">
+                        <i data-feather="search"></i> Cari
+                    </button>
+                    <button id="btnReset" class="col-lg-2 btn btn-outline-secondary">
+                        <i data-feather="x"></i> Reset
+                    </button>
+                </div>
+            </div>
         </div>
-        <table class="table table-hover my-0">
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Phone</th>
                     <th>Table Number</th>
-                    <th class="d-none d-md-table-cell">Order Code</th>
-                    <th class="d-none d-md-table-cell">Total Price</th>
-                    <th class="d-none d-md-table-cell">Payment Method</th>
-                    <th class="d-none d-md-table-cell">Status</th>
+                    <th class="d-none d-xl-table-cell">Order Code</th>
+                    <th class="d-none d-xl-table-cell">Total Price</th>
+                    <th class="d-none d-xl-table-cell">Payment Method</th>
+                    <th class="d-none d-xl-table-cell">Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="orderList">
-                {{-- <tr>
-                    <td>Project Apollo</td>
-                    <td>01/01/2021</td>
-                    <td>31/06/2021</td>
-                    <td class="d-none d-md-table-cell">31/06/2021</td>
-                    <td class="d-none d-md-table-cell">31/06/2021</td>
-                    <td class="d-none d-md-table-cell">31/06/2021</td>
-                    <td class="d-none d-md-table-cell"><span class="badge bg-success">Selesai</span></td>
-                    <td><button class="btn btn-info btn-sm rounded"><i class="align-middle" data-feather="edit"></i></button></td>
-                </tr> --}}
-            </tbody>
+            <tbody id="orderList"></tbody>
         </table>
         <div id="pagination" class="mt-3"></div>
     </div>
 </div>
+
+<!--  Modal Update Status -->
+<div class="modal fade" id="modalUpdateStatus" tabindex="-1" aria-labelledby="modalUpdateStatusLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalUpdateStatusLabel">Ubah Status Pesanan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formUpdateStatus">
+          <input type="hidden" id="orderId">
+          <div class="mb-3">
+            <label for="orderStatus" class="form-label">Status</label>
+            <select id="orderStatus" class="form-select" required>
+              <option value="">-- Pilih Status --</option>
+              <option value="menunggu">Menunggu</option>
+              <option value="diproses">Diproses</option>
+              <option value="dihidangkan">Dihidangkan</option>
+              <option value="selesai">Selesai</option>
+              <option value="batal">Batal</option>
+            </select>
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  Modal Info Pesanan -->
+<div class="modal fade" id="modalInfoOrder" tabindex="-1" aria-labelledby="modalInfoOrderLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalInfoOrderLabel">Detail Pesanan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="orderInfoBody">
+        <p class="text-muted">Memuat data...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 @push('script')
 <script>
     $(document).ready(function() {
         function loadData(page = 1) {
+            const search = $('#search').val(); 
+            const status = $('#filterStatus').val(); 
+
             $.ajax({
-                url: `/order/data?page=${page}`,
+                url: `/order/data?page=${page}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`,
                 method: 'GET',
                 beforeSend: function() {
                     $('#orderList').html(`
@@ -125,12 +185,12 @@
                 success: function(response) {
                     if (response.data && response.data.length) {
                         renderOrders(response.data);
-                        renderPagination(response); // 🔥 render tombol pagination
+                        renderPagination(response); 
                     } else {
                         $('#orderList').html(`
                             <tr><td colspan="8" class="text-center py-5 text-muted">Tidak ada pesanan.</td></tr>
                         `);
-                        $('#pagination').html(''); // kosongkan pagination
+                        $('#pagination').html(''); 
                     }
 
                     if (typeof feather !== 'undefined') feather.replace();
@@ -142,6 +202,7 @@
                 }
             });
         }
+
         function renderPagination(response) {
             let html = `<nav><ul class="pagination justify-content-center">`;
 
@@ -177,54 +238,24 @@
             loadData(page);
         });
 
+        $('#filterStatus').on('change', function() {
+            loadData(1);
+        });
 
+        $('#btnSearch').on('click', function() {
+            const search = $('#search').val().trim();
+            if (search.length === 0) {
+                return;
+            }
+            loadData(1);
+        });
 
+        $('#btnReset').on('click', function() {
+            $('#search').val('');
+            $('#filterStatus').val('');
+            loadData(1);
+        });
 
-
-        // function loadData(){
-        //     $.ajax({
-        //         url: '/order/data',
-        //         method: 'GET',
-        //         success: function(response) {
-        //             if (response.data && response.data.length) {
-        //                 renderOrders(response.data);
-        //             } else {
-        //                 $('#orderList').html(`
-        //                     <tr>
-        //                         <td colspan="8" class="text-center py-5">
-        //                             <div class="text-muted fw-semibold">
-        //                                 <i class="align-middle" data-feather="inbox"></i> Tidak ada pesanan saat ini.
-        //                             </div>
-        //                             <div class="small text-secondary mt-2">
-        //                                 Semua pesanan akan muncul di sini setelah pelanggan memesan.
-        //                             </div>
-        //                         </td>
-        //                     </tr>
-        //                 `);
-
-        //                 if (typeof feather !== 'undefined') feather.replace();
-        //             }
-        //         },
-        //         error: function() {
-        //                 $('#orderList').html(`
-        //                     <tr>
-        //                         <td colspan="8" class="text-center py-5">
-        //                             <div class="text-danger fw-bold">
-        //                                 <i class="align-middle" data-feather="alert-circle"></i>
-        //                                 Gagal memuat data pesanan.
-        //                             </div>
-        //                             <div class="text-muted mt-2 small">Periksa koneksi atau coba lagi nanti.</div>
-        //                             <button class="btn btn-sm btn-outline-danger mt-3" onclick="loadData()">
-        //                                 <i class="align-middle" data-feather="refresh-cw"></i> Coba Lagi
-        //                             </button>
-        //                         </td>
-        //                     </tr>
-        //                 `);
-
-        //                 if (typeof feather !== 'undefined') feather.replace();
-        //         }
-        //     });
-        // }
         function renderOrders(orders) {
                 let html = '';
 
@@ -238,27 +269,26 @@
                     default: badgeClass = 'bg-danger';
                 }
 
-                // <td>${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
-                // <td class="d-none d-md-table-cell">${order.total ? 'Rp ' + Number(order.total).toLocaleString('id-ID') : '-'}</td>
                 html += `
                     <tr>
                         <td>${order.name ?? '-'}</td>
                         <td>${order.phone ?? '-'}</td>
                         <td>${order.table_number ?? '-'}</td>
-                        <td class="d-none d-md-table-cell">${order.order_code ?? '-'}</td>
-                        <td class="d-none d-md-table-cell">Rp ${Number(order.total_price || 0).toLocaleString('id-ID')}</td>
-                        <td class="d-none d-md-table-cell">${order.payment_method ?? '-'}</td>
-                        <td class="d-none d-md-table-cell">
+                        <td class="d-none d-xl-table-cell">${order.order_code ?? '-'}</td>
+                        <td class="d-none d-xl-table-cell">Rp ${Number(order.total_price || 0).toLocaleString('id-ID')}</td>
+                        <td class="d-none d-xl-table-cell">${order.payment_method ?? '-'}</td>
+                        <td class="d-none d-xl-table-cell">
                             <span class="badge ${badgeClass} text-uppercase">${order.status ?? '-'}</span>
                         </td>
                         <td>
-                            <button class="btn btn-info btn-sm rounded btn-edit" data-id="${order.id}">
-                                <i class="align-middle" data-feather="edit"></i>
-                            </button>
-                            <button class="btn btn-primary btn-sm rounded btn-edit" data-id="${order.id}">
-                                <i class="align-middle" data-feather="eye"></i>
-                            </button>
-                        </td>
+                        <button class="btn btn-info btn-sm rounded btn-edit" data-id="${order.id}">
+                            <i data-feather="edit" class="align-middle"></i>
+                        </button>
+                        <button class="btn btn-primary btn-sm rounded btn-view" data-id="${order.id}">
+                            <i data-feather="eye" class="align-middle"></i>
+                        </button>
+                    </td>
+
                     </tr>
                 `;
             });
@@ -269,11 +299,6 @@
                 feather.replace();
             }
         }
-        
-
-
-
-
 
         function loadOrderInfo() {
             $.ajax({
@@ -307,6 +332,135 @@
                 }
             });
         }
+
+
+        $(document).on('click', '.btn-edit', function() {
+            const id = $(this).data('id');
+            $('#orderId').val(id);
+            $('#orderStatus').val('');
+            $('#modalUpdateStatus').modal('show');
+        });
+
+        $('#formUpdateStatus').on('submit', function(e) {
+            e.preventDefault();
+
+            const id = $('#orderId').val();
+            const status = $('#orderStatus').val();
+
+            if (!status) {
+                alert('Pilih status terlebih dahulu.');
+                return;
+            }
+
+            $.ajax({
+                url: `/order/${id}/status`,
+                method: 'PUT',
+                data: {
+                    status: status,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function() {
+                    $('#formUpdateStatus button[type=submit]').prop('disabled', true).text('Menyimpan...');
+                },
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'status pesanan berhasil diubah.',
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                    $('#modalUpdateStatus').modal('hide');
+                    loadData(); 
+                    loadOrderInfo()
+                },
+                error: function(err) {
+                    alert('Gagal mengubah status pesanan.');
+                },
+                complete: function() {
+                    $('#formUpdateStatus button[type=submit]').prop('disabled', false).text('Simpan');
+                }
+            });
+        });
+
+
+        $(document).on('click', '.btn-view', function() {
+            const id = $(this).data('id');
+            
+            $('#modalInfoOrder').modal('show');
+            $('#orderInfoBody').html('<p class="text-muted">Memuat data...</p>');
+            
+            $.getJSON(`/order/${id}`, function(res) {
+                console.log(res)
+                if (!res) {
+                    $('#orderInfoBody').html('<p class="text-danger">Data pesanan tidak ditemukan.</p>');
+                    return;
+                }
+
+                const createdAt = new Date(res.created_at).toLocaleString('id-ID');
+                const statusBadge = {
+                    menunggu: 'bg-warning',
+                    diproses: 'bg-info',
+                    dihidangkan: 'bg-primary',
+                    selesai: 'bg-success',
+                    batal: 'bg-danger'
+                }[res.status] || 'bg-secondary';
+
+                const items = res.order_items && res.order_items.length
+                    ? res.order_items.map((item, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.product == null ? "-" : item.product.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.note ? `<small class="text-muted">${item.note}</small>` : '-'}</td>
+                            <td>Rp ${item.subtotal.toLocaleString('id-ID')}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="5" class="text-center text-muted">Tidak ada item pesanan</td></tr>';
+
+                const totalFormatted = Number(res.total_price).toLocaleString('id-ID');
+
+                $('#orderInfoBody').html(`
+                    <div class="mb-3">
+                        <div><strong>Order Code:</strong> ${res.order_code}</div>
+                        <div><strong>Nama:</strong> ${res.name}</div>
+                        <div><strong>Telepon:</strong> ${res.phone}</div>
+                        <div><strong>Nomor Meja:</strong> ${res.table_number}</div>
+                        <div><strong>Metode Pembayaran:</strong> ${res.payment_method}</div>
+                        <div><strong>Status:</strong> <span class="badge ${statusBadge} text-uppercase">${res.status}</span></div>
+                        <div><strong>Waktu Pesan:</strong> ${createdAt}</div>
+                    </div>
+                    <hr>
+                    <h6 class="mb-3">Item Pesanan</h6>
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Produk</th>
+                                <th>Qty</th>
+                                <th>Catatan</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items}
+                        </tbody>
+                    </table>
+                    <div class="text-end mt-3">
+                        <h6><strong>Total:</strong> Rp ${totalFormatted}</h6>
+                    </div>
+                `);
+            }).fail(() => {
+                $('#orderInfoBody').html('<p class="text-danger">Gagal memuat data pesanan.</p>');
+            });
+        });
+
+
+
+
+
+        // ======================================================
+        // ======================================================
 
         loadData();
         loadOrderInfo();

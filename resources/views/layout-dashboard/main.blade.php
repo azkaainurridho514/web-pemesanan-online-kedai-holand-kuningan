@@ -14,11 +14,34 @@
 		<link rel="canonical" href="https://demo-basic.adminkit.io/" />
 
 		<title>@yield('title')</title>
+		<meta name="csrf-token" content="{{ csrf_token() }}">
 
 		<link href="{{ asset("adminkit-dev-old/static/css/app.css") }}" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 		@vite('resources/css/app.css')
+		<style>
+			/* Untuk semua browser modern */
+			::-webkit-scrollbar {
+			display: none;
+			}
+
+			/* Untuk Firefox */
+			html {
+			scrollbar-width: none;
+			}
+
+			/* Pastikan body tetap bisa di-scroll */
+			body {
+			overflow: auto;
+			}
+
+			.scrollable-row {
+			max-height: 300px; 
+			overflow-y: hidden;
+			overflow-x: auto;
+			}
+		</style>
 	</head>
 
 	<body>

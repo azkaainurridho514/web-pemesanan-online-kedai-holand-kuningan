@@ -9,19 +9,7 @@
                     <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
                 </a>
             </li>
-            <li class="sidebar-header">
-                HOME
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/header*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/header">
-                    <i class="align-middle" data-feather="layout"></i> <span class="align-middle">Header</span>
-                </a>
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/footer*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/footer">
-                    <i class="align-middle" data-feather="columns"></i> <span class="align-middle">Footer</span>
-                </a>
-            </li>
+            
             <li class="sidebar-header">
                 ORDERS
             </li>
@@ -51,6 +39,19 @@
             <li class="sidebar-item {{ request()->is('admin/option*') ? 'active' : '' }}">
                 <a class="sidebar-link" href="/admin/option">
                     <i class="align-middle" data-feather="git-commit"></i> <span class="align-middle">Option</span>
+                </a>
+            </li>
+            <li class="sidebar-header">
+                ADDITIONAL HOME PAGE
+            </li>
+            <li class="sidebar-item {{ request()->is('admin/header*') ? 'active' : '' }}">
+                <a class="sidebar-link" href="/admin/header">
+                    <i class="align-middle" data-feather="layout"></i> <span class="align-middle">Header</span>
+                </a>
+            </li>
+            <li class="sidebar-item {{ request()->is('admin/footer*') ? 'active' : '' }}">
+                <a class="sidebar-link" href="/admin/footer">
+                    <i class="align-middle" data-feather="columns"></i> <span class="align-middle">Footer</span>
                 </a>
             </li>
             <li class="sidebar-header">

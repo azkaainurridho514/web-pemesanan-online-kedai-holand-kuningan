@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class OptionItems extends Model
 {
@@ -23,6 +24,10 @@ class OptionItems extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+    public function option()
+    {
+        return $this->belongsTo(Option::class, 'option_id', 'id');
     }
     
 }
