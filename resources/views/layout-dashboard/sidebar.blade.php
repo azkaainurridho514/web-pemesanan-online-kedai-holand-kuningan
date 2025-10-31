@@ -4,11 +4,11 @@
             <span class="align-middle">Kedai Holad</span>
         </a>
         <ul class="sidebar-nav">
-            <li class="sidebar-item {{ request()->is('admin/dashboard*') ? 'active' : '' }}">
+            {{-- <li class="sidebar-item {{ request()->is('admin/dashboard*') ? 'active' : '' }}">
                 <a class="sidebar-link" href="/admin/dashboard">
                     <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
                 </a>
-            </li>
+            </li> --}}
             
             <li class="sidebar-header">
                 ORDERS
@@ -18,11 +18,11 @@
                     <i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Order</span>
                 </a>
             </li>
-            <li class="sidebar-item {{ request()->is('admin/cashier*') ? 'active' : '' }}">
+            {{-- <li class="sidebar-item {{ request()->is('admin/cashier*') ? 'active' : '' }}">
                 <a class="sidebar-link" href="/admin/cashier">
                     <i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Cashier</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="sidebar-header">
                 MENUS
             </li>
@@ -41,7 +41,7 @@
                     <i class="align-middle" data-feather="git-commit"></i> <span class="align-middle">Option</span>
                 </a>
             </li>
-            <li class="sidebar-header">
+            {{-- <li class="sidebar-header">
                 ADDITIONAL HOME PAGE
             </li>
             <li class="sidebar-item {{ request()->is('admin/header*') ? 'active' : '' }}">
@@ -53,7 +53,7 @@
                 <a class="sidebar-link" href="/admin/footer">
                     <i class="align-middle" data-feather="columns"></i> <span class="align-middle">Footer</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="sidebar-header">
                 PERSON
             </li>

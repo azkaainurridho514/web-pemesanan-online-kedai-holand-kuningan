@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OptionController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,11 +36,13 @@ Route::prefix('update-data')->group(function () {
     Route::put('product/{id}', [ProductController::class, 'update']);
     Route::put('category/{id}', [CategoryController::class, 'update']);
     Route::put('option/{id}', [OptionController::class, 'update']);
+    Route::put('order/{id}', [OrderController::class, 'update']);
 });
 Route::prefix('create-data')->group(function () {
     Route::post('product', [ProductController::class, 'store']);
     Route::post('category', [CategoryController::class, 'store']);
     Route::post('option', [OptionController::class, 'store']);
+    Route::post('order', [OrderController::class, 'store']);
 });
 Route::prefix('delete-data')->group(function () {
     Route::delete('product/{id}', [ProductController::class, 'destroy']);

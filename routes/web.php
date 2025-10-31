@@ -28,6 +28,8 @@ Route::post('/broadcast-order', [OrderController::class, 'sendOrderEvent']);
 
 Route::get('/login-admin', [AuthController::class, 'index']);
 Route::prefix('admin')->group(function(){
+    Route::redirect('/', '/admin/order');
+    Route::redirect('/dashboard', '/admin/order');
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('header', [HomeController::class, 'headerView']);
     Route::get('footer', [HomeController::class, 'footerView']);

@@ -46,9 +46,14 @@
 		}
 
         .scrollable-row {
-          max-height: 300px; 
+          /* max-height: 300px; 
           overflow-y: hidden;
-          overflow-x: auto;
+          overflow-x: auto; */
+		    display: flex;
+			overflow-x: auto; /* Aktifkan scroll horizontal */
+			white-space: nowrap; /* Mencegah elemen turun ke bawah */
+			scrollbar-width: thin; /* (opsional) scrollbar tipis untuk Firefox */
+			-webkit-overflow-scrolling: touch; /* scroll halus di perangkat touch */
         }
       </style>
 	  @vite('resources/css/app.css')

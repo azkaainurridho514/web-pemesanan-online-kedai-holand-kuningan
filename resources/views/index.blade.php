@@ -12,7 +12,7 @@
         </div>
     </div>
 </div>						
-<div class="row d-flex justify-content-between mb-4 align-content-center">
+<div class="row d-flex justify-content-between mb-4 align-items-center">
     <div class="single-footer-widget col-md-5 w-full">
         <div class="" id="mc_embed_signup">
             <form class="form-inline" onsubmit="event.preventDefault(); searchMenu();">
@@ -25,7 +25,7 @@
             </form>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-7">
         <div class="d-flex gap-2 scrollable-row" id="categoryList">
         </div>
     </div>
