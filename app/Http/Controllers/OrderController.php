@@ -42,8 +42,9 @@ class OrderController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
                 ->orWhere('table_number', 'like', "%{$search}%")
-                ->orWhere('payment_method', 'like', "%{$search}%");
+                ->orWhere('order_code', 'like', "%{$search}%");
             });
         }
         if (!empty($status) && $status !== 'all') {
