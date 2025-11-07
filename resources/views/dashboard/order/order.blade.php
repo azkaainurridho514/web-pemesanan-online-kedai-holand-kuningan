@@ -2,8 +2,8 @@
 @section('title', "Kedai Holand | Order")    
 @section('title-page', "Order")   
 @section('main')
-<div class="row mb-5">
-    <div class="col-lg-3">
+<div class="row">
+    <div class="col-lg-6">
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -20,7 +20,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-6">
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -37,7 +37,9 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+</div>
+<div class="row mb-5">
+    <div class="col-lg-4">
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -56,7 +58,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -74,21 +76,21 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card">
             <div class="card-body">
                 <div class="row">
                     <div class="col mt-0">
-                        <h5 class="card-title">Selesai</h5>
+                        <h5 class="card-title">Batal</h5>
                     </div>
 
                     <div class="col-auto">
                         <div class="stat text-primary">
-                            <i class="align-middle" data-feather="check-circle"></i>
+                            <i class="align-middle" data-feather="trash"></i>
                         </div>
                     </div>
                 </div>
-                <h1 class="mt-1" id="done"></h1>
+                <h1 class="mt-1" id="cancel"></h1>
             </div>
         </div>
     </div>
@@ -108,6 +110,16 @@
                     </select>
                     <button id="btnAdd" class="btn btn-primary " data-method='add'>
                         <i data-feather="plus"></i> Buat Order
+                    </button>
+                    <select id="selectPeriod" class="form-select" style="max-width: 180px;">
+                        <option value="0">Semua</option>
+                        <option value="1">Hari ini</option>
+                        <option value="2">Satu minggu</option>
+                        <option value="3">Satu bulan</option>
+                        <option value="4">Satu tahun</option>
+                    </select>
+                    <button id="btnDownloadPeriod" class="btn btn-primary">
+                        <i data-feather="download"></i> Download
                     </button>
                 </div>
                 <div class="col-lg-6 d-flex gap-2 mb-2">
@@ -407,7 +419,7 @@
                         <td class="d-flex justify-content-end">
                             <button  type="button" class="btn btn-success btn-sm rounded" data-id="${item.id}" data-option_id="${item.option_id}"  
                             data-option='${JSON.stringify(item.option && item.option.items ? item.option.items : [])}'
-                            data-option_name="${item.option && item.option.name ? item.option.name : "-"}" data-name="${item.name}" id="addProduct">
+                            data-option_name="${item.option && item.option.name ? item.option.name : "-"}" data-name="${item.name}" data-note="${item.note}" id="addProduct">
                                 <i data-feather="plus" class="align-middle"></i>
                             </button>
                         </td>
@@ -479,7 +491,7 @@
                 url: '/order/data/info',
                 method: 'GET',
                 beforeSend: function() {
-                    $('#wait, #process, #serve, #done').html('<span class="text-muted">...</span>');
+                    $('#wait, #process, #serve, #done, #cancel').html('<span class="text-muted">...</span>');
                 },
                 success: function(response) {
                     if (response) {
@@ -487,19 +499,21 @@
                         const processCount = response.process ? response.process.length : 0;
                         const serveCount = response.serve ? response.serve.length : 0;
                         const doneCount = response.done ? response.done.length : 0;
+                        const cancelCount = response.cancel ? response.cancel.length : 0;
 
                         $('#wait').text(waitCount);
                         $('#process').text(processCount);
                         $('#serve').text(serveCount);
                         $('#done').text(doneCount);
+                        $('#cancel').text(cancelCount);
                     } else {
-                        $('#wait, #process, #serve, #done').html('<span class="text-muted">0</span>');
+                        $('#wait, #process, #serve, #done, #cancel').html('<span class="text-muted">0</span>');
                     }
 
                     if (typeof feather !== 'undefined') feather.replace();
                 },
                 error: function() {
-                    $('#wait, #process, #serve, #done').html(`
+                    $('#wait, #process, #serve, #done, #cancel').html(`
                         <span class="text-danger fw-bold">!</span>
                     `);
                     console.error("Gagal memuat data status pesanan.");
@@ -645,12 +659,15 @@
                             id: item.product.id,
                             name: item.product.name,
                             qty: item.quantity,
+                            note: item.note,
                             option_id: item.product.option_id ?? null, 
                             option: item.product.option?.items ?? null,
                             option_name: item.product.option?.name ?? null,
                         });
                     });
                 }
+
+                
                 menuItemSelected.unshift(...itemIsSelect);
             }).always(() => {
                 renderMenuSelected();
@@ -727,6 +744,32 @@
                 $('#modalAddOrder').modal('show');
             }
         });
+        function validateItems(items) {
+            for (const item of items) {
+
+                const hasOption = (item.option && item.option.length > 0) 
+                                || (item.option_id && item.option_id !== "");
+
+                if (hasOption && (!item.note || item.note.trim() === "")) {
+                return {
+                    valid: false,
+                    message: `Note wajib diisi untuk menu "${item.name}" karena memiliki opsi.`
+                };
+                }
+            }
+
+            return { valid: true };
+        }
+        function validateForm() {
+            const name = $('#formAddOrder input[name="name"]').val().trim();
+            const phone = $('#formAddOrder input[name="phone"]').val().trim();
+
+            if (!name) return { valid: false, message: "Nama wajib diisi" };
+            if (!phone) return { valid: false, message: "Nomor telepon wajib diisi" };
+            if (!/^[0-9]+$/.test(phone)) return { valid: false, message: "Nomor telepon hanya boleh angka" };
+
+            return { valid: true };
+        }
 
         $('#formAddOrder').on('submit', function(e) {
             e.preventDefault();
@@ -741,23 +784,47 @@
                 });
                 return;
             }
+            const result = validateItems(menuItemSelected);
+            if (!result.valid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Opsi di pilih',
+                    text: result.message,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            let formCheck = validateForm();
+            if (!formCheck.valid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: formCheck.message,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
             let products = menuItemSelected.map(item => ({
                 product_id: item.id,
                 qty: item.qty,
-                note: item.note
+                note: item.note == "undefined" ? "" : item.note
             }));
-
+            const name = $('#formAddOrder input[name="name"]').val().trim();
+            const phone = $('#formAddOrder input[name="phone"]').val().trim();
+            const rawTable = $('#formAddOrder input[name="table_number"]').val();
+            const table_number = (rawTable == null || rawTable.trim() === "") ? "-" : rawTable.trim();
             let formData = {
-                name: $('#formAddOrder input[name="name"]').val(),
-                phone: $('#formAddOrder input[name="phone"]').val(),
-                table_number: $('#formAddOrder input[name="table_number"]').val(),
+                name: name,
+                phone: phone,
+                table_number: table_number,
                 products: products
             };
 
             let isEdit = id !== "" && id !== null;
             let url = isEdit ? `/api/update-data/order/${id}` : `/api/create-data/order`;
             let method = isEdit ? 'PUT' : 'POST';
-
             $.ajax({
                 url: url,
                 method: method,
@@ -781,6 +848,7 @@
                     $('#modalAddOrder').modal('hide');
                     $('#formAddOrder')[0].reset();
                     loadData()
+                    loadOrderInfo()
                     menuItemSelected = []; 
                 },
                 error: function(xhr) {
@@ -793,6 +861,12 @@
                 }
             });
         });
+        $(document).on('input', '.qty-input', function() {
+            const index = $(this).data("index");
+            const qty = parseInt($(this).val()) || 1;
+
+            menuItemSelected[index].qty = qty;
+        });
 
         function renderMenuSelected(){
             let html = '';
@@ -804,18 +878,18 @@
                     </tr>
                 `;
             }else{
-                menuItemSelected.forEach(item => {
+                menuItemSelected.forEach((item, index) => {
                     html += `
                        <tr>    
                             <td>${item.name}</td>
-                            <td style="max-width: 100px;"> <input type="number" class="form-control" id="qty-input" data-id="${item.id}" value="${item.qty}" placeholder="Qty"></td>
+                            <td style="max-width: 100px;"> <input type="number" class="form-control qty-input" data-index="${index}" data-id="${item.id}" value="${item.qty}" placeholder="Qty"></td>
                             <td> 
                                ${item.option_id
                                 ? `
-                                    <select id="selectOption-${item.id}" class="form-select border-secondary">
+                                    <select class="form-select border-secondary selectOption" data-index="${index}">
                                         <option value="">Pilih Opsi</option>
                                         ${item.option.map(opt => `
-                                        <option value="${opt.id}">${opt.name}</option>
+                                        <option value="${opt.id}" ${item.note == opt.name ? "selected" : ""} data-option="${opt.name}">${opt.name}</option>
                                         `).join('')}
                                     </select>
                                 `
@@ -824,7 +898,7 @@
 
                             </td>
                             <td class="d-flex justify-content-end align-items-center">
-                                <button type="button" class="btn btn-danger btn-sm rounded" data-id="${item.id}" id="deleteProduct">
+                                <button type="button" class="btn btn-danger btn-sm rounded deleteProduct" data-index="${index}">
                                     <i data-feather="trash" class="align-middle"></i>
                                 </button>
                             </td>
@@ -841,29 +915,20 @@
 
         }
 
-        $(document).on('input', '#qty-input', function() {
-            const id = $(this).data('id');
-            const newQty = parseInt($(this).val()) || 1;
-            const item = menuItemSelected.find(p => p.id === id);
-            if (item) item.qty = newQty;
-        });
-        $(document).on('input', '#selectOption', function() {
-            const note = $(this).val();
-            const id = $(this).data('id');
-            const item = menuItemSelected.find(p => p.id === id);
-            if (item) item.note = note;
+       
+        $(document).on('change', '.selectOption', function() {
+            const index = $(this).data("index"); 
+            const optionName = $(this).find(":selected").data("option");
+            menuItemSelected[index].note = optionName;
+            renderMenuSelected();
         });
 
-        $(document).on('click', '#deleteProduct', function() {
-            let id = $(this).data("id")
-            const index = menuItemSelected.findIndex(p => p.id === id);
+        $(document).on('click', '.deleteProduct', function() {
+            const index = $(this).data("index");
+            menuItemSelected.splice(index, 1);
 
-            if (index !== -1) {
-                menuItemSelected.splice(index, 1); 
-                renderMenuSelected()
-                
-            }
-        })
+            renderMenuSelected();
+        });
 
         $(document).on('click', '#addProduct', function() {
             let id = $(this).data("id");
@@ -871,6 +936,7 @@
             let option_name = $(this).data("option_name");
             let option_id = $(this).data("option_id");
             let option = $(this).data("option");
+            let note = $(this).data("note");
             if (typeof option === "string") {
                 try {
                     option = JSON.parse(option);
@@ -882,43 +948,30 @@
             if (!Array.isArray(option)) {
                 option = [];
             }
-            addProductToList(id, name, option_id, option, option_name)
+            addProductToList(id, name, option_id, option, option_name, note)
         })
 
-        function addProductToList(id, name, option_id, option, option_name){
-
-            const existingProduct = menuItemSelected.find(p => p.id === id);
-
-            if (!existingProduct) {
-                $('#headerProductListSelected').html(
-                    `
-                        <tr>
-                            <th>Name</th>
-                            <th>Qty</th>
-                            <th>Option</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    `
-                )
-                // existingProduct.qty += 1;
-                menuItemSelected.push({
-                    id: id,
-                    name: name,
-                    qty: 1,
-                    option_id: option_id, 
-                    option: option,
-                    option_name: option_name,
-                });
-                renderMenuSelected();
-            }else{
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Menu sudah di tambahkan',
-                    // text: 'Menu sudah di tambahkan',
-                    timer: 1000,
-                    showConfirmButton: false
-                });
-            }
+        function addProductToList(id, name, option_id, option, option_name, note){
+            $('#headerProductListSelected').html(
+                `
+                    <tr>
+                        <th>Name</th>
+                        <th>Qty</th>
+                        <th>Option</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                `
+            )
+            menuItemSelected.push({
+                id: id,
+                name: name,
+                qty: 1,
+                option_id: option_id, 
+                option: option,
+                note: note,
+                option_name: option_name,
+            });
+            renderMenuSelected();
         }
 
         // ======================================================

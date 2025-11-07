@@ -8,6 +8,7 @@ use App\Events\OrderEvent;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\OrderLog;
 
 
 class OrderController extends Controller
@@ -30,6 +31,7 @@ class OrderController extends Controller
             "process" => $orders->get('diproses') ?? [],
             "serve" => $orders->get('dihidangkan') ?? [],
             "done" => $orders->get('selesai') ?? [],
+            "cancel" => $orders->get('batal') ?? [],
         ]);
     }
     public function dataOrder(Request $request){
@@ -47,7 +49,7 @@ class OrderController extends Controller
         if (!empty($status) && $status !== 'all') {
             $query->where('status', $status);
         }
-        $orders = $query->orderBy('created_at', 'desc')->paginate(15);
+        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
         return response()->json($orders);
     }
 
@@ -63,7 +65,12 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->status = $request->status;
         $order->save();
-
+        OrderLog::create([
+            'id' => Str::uuid(),
+            'order_id' => $order->id,
+            'status' => $request->status,
+            'message' => "Status order diperbarui menjadi '{$request->status}'."
+        ]);
         return response()->json(['message' => 'Status berhasil diperbarui']);
     }
     
@@ -80,7 +87,6 @@ class OrderController extends Controller
 
         $total = 0;
 
-        // Hitung total
         foreach ($request->products as $item) {
             $product = Product::find($item['product_id']);
             $total += $product->price * $item['qty'];
@@ -95,6 +101,12 @@ class OrderController extends Controller
             'total_price' => $total,
             'payment_method' => 'cash',
             'status' => 'menunggu',
+        ]);
+        OrderLog::create([
+            'id' => Str::uuid(),
+            'order_id' => $order->id,
+            'status' => 'menunggu',
+            'message' => 'Order dibuat dan menunggu konfirmasi.'
         ]);
 
         foreach ($request->products as $item) {
@@ -159,6 +171,13 @@ class OrderController extends Controller
 
         $order->update([
             'total_price' => $totalBaru,
+        ]);
+
+        OrderLog::create([
+            'id' => Str::uuid(),
+            'order_id' => $order->id,
+            'status' => $order->status,
+            'message' => "Produk pada order diperbarui oleh admin."
         ]);
 
         return response()->json([
