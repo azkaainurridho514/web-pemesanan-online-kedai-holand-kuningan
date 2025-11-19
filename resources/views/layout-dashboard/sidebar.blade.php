@@ -63,7 +63,7 @@
                 PERSON
             </li>
             <li class="sidebar-item">
-                <a class="sidebar-link" href="#">
+                <a class="sidebar-link" href="#" id="btn-logout">
                     <i class="align-middle" data-feather="log-out"></i> <span class="align-middle">Logout</span>
                 </a>
             </li>

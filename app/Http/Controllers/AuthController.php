@@ -10,7 +10,8 @@ class AuthController extends Controller
     public function index(){
         return view('login');
     }
-    public function login(Request $request)
+
+   public function login(Request $request)
     {
         $validator = \Validator::make($request->all(), [
             'email' => 'required|email',
@@ -26,6 +27,7 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        // langsung validate tanpa remember
         if (!auth()->attempt($credentials)) {
             return response()->json([
                 'status' => false,
@@ -35,9 +37,8 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'redirect' => route('dashboard'),
-            'message' => 'Login berhasil!'
-        ]);
+            'redirect' => url('/admin/order')
+        ], 200);
     }
 
 }

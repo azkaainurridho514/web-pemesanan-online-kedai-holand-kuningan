@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Order;
@@ -22,10 +23,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        User::create([
             'name' => 'Admin Kedai Holand',
             'email' => 'adminkedaiholand@gmail.com',
-            'password' => 'kedaiholand123',
+            'password' => Hash::make('kedaiholand123'),
         ]);
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
@@ -34,11 +35,6 @@ class DatabaseSeeder extends Seeder
         OptionItems::truncate();
         Product::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-  
-
-
-
 
         $categories = collect([
             ['name' => 'Makanan', 'description' => 'Aneka makanan utama dan lauk.'],

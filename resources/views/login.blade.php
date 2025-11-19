@@ -14,14 +14,9 @@
                         <div class="card-body">
                             <div class="m-sm-4">
                                 <div class="text-center">
-                                    {{-- <img src="{{ asset('adminkit-dev-old/static/img/avatars/avatar.jpg') }}" 
-                                         class="img-fluid rounded-circle" width="132" height="132" /> --}}
                                 </div>
-                                <div id="error-global" class="text-danger d-none"></div>
-
                                 <form id="form-login">
                                     @csrf
-
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
                                         <input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
@@ -33,6 +28,14 @@
                                         <input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your password" />
                                         <small class="text-danger error-password"></small>
                                     </div>
+                                    {{-- <div class="mb-3">
+                                        <label class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                                            <span class="form-check-label">
+                                                Remember me next time
+                                            </span>
+                                        </label>
+                                    </div> --}}
 
                                     <div class="text-center mt-3">
                                         <button type="submit" id="btn-login" class="btn btn-lg btn-primary w-100">
@@ -41,6 +44,7 @@
                                     </div>
 
                                 </form>
+                                <div id="error-global" class="text-danger d-none mt-3"></div>
                             </div>
                         </div>
                     </div>
@@ -51,41 +55,42 @@
     </div>
 </main>
 
-{{-- AJAX SCRIPT --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$("#form-login").on("submit", function(e){
-    e.preventDefault();
-
-    // disabled button
-    $("#btn-login").prop("disabled", true).text("Processing...");
-
-    // reset error
-    $(".error-email").text("");
-    $(".error-password").text("");
-    $("#error-global").addClass("d-none").text("");
-
-    $.ajax({
-        url: "{{ route('login.ajax') }}",
-        type: "POST",
-        data: $(this).serialize(),
-        success: function(res) {
-            window.location.href = res.redirect;
-        },
-        error: function(err) {
-            $("#btn-login").prop("disabled", false).text("Sign in");
-            if (err.status === 422) {
-                let errors = err.responseJSON.errors;
-                if (errors.email) $(".error-email").text(errors.email[0]);
-                if (errors.password) $(".error-password").text(errors.password[0]);
-            }
-            if (err.status === 401) {
-                $("#error-global").removeClass("d-none")
-                    .text(err.responseJSON.message);
-            }
-        }
+    $(document).ready(function () {
+        $("#form-login").on("submit", function(e){
+            e.preventDefault();
+        
+            $("#btn-login").prop("disabled", true).text("Processing...");
+        
+            let formData = $(this).serializeArray();  
+        
+            $.ajax({
+                url: "/login",
+                type: "POST",
+                data: $.param(formData),
+                success: function(res) {
+                    window.location.href = res.redirect;
+                },
+                error: function(err) {
+                    console.log(err)
+                    $("#btn-login").prop("disabled", false).text("Sign in");
+        
+                    if (err.status === 422) {
+                        let errors = err.responseJSON.errors;
+                        if (errors.email) $(".error-email").text(errors.email[0]);
+                        if (errors.password) $(".error-password").text(errors.password[0]);
+                    }
+        
+                    if (err.status === 401) {
+                        $("#error-global").removeClass("d-none")
+                            .text(err.responseJSON.message);
+                    }
+                }
+            });
+        });
     });
-});
+
 </script>
 
 @endsection
