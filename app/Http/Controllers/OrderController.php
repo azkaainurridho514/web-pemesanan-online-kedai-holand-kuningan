@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\OrderLog;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 
 class OrderController extends Controller
@@ -65,6 +67,11 @@ class OrderController extends Controller
         $request->validate(['status' => 'required|string']);
         $order = Order::findOrFail($id);
         $order->status = $request->status;
+        if (in_array($request->status, ['selesai', 'batal'])) {
+            $order->completed_at = now();
+        } else {
+            $order->completed_at = null;
+        }
         $order->save();
         OrderLog::create([
             'id' => Str::uuid(),
@@ -72,8 +79,10 @@ class OrderController extends Controller
             'status' => $request->status,
             'message' => "Status order diperbarui menjadi '{$request->status}'."
         ]);
+
         return response()->json(['message' => 'Status berhasil diperbarui']);
     }
+
     
     public function store(Request $request)
     {
@@ -187,4 +196,70 @@ class OrderController extends Controller
             'total_baru' => $order->total_price,
         ]);
     }    
+
+
+    public function reportView(){
+        return view('dashboard.order.report');
+    }
+    
+    public function dataReport(Request $request)
+    {
+           $status = $request->query('status'); 
+    $dateFilter = $request->query('date_filter'); 
+    $startDate = $request->query('start_date');
+    $endDate = $request->query('end_date');
+
+    // Pastikan status valid
+    if (!in_array($status, ['selesai', 'batal'])) {
+        return response()->json([
+            'message' => 'Status tidak valid. Gunakan ?status=selesai atau ?status=batal'
+        ], 400);
+    }
+
+    // Base query
+    $query = DB::table('order_items')
+        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        ->join('products', 'order_items.product_id', '=', 'products.id')
+        ->where('orders.status', $status)
+        ->select(
+            'products.name as product_name',
+            DB::raw('SUM(order_items.quantity) as total_sold'),
+            DB::raw('SUM(order_items.subtotal) as total_revenue')
+        )
+        ->groupBy('products.name')
+        ->orderByDesc('total_sold');
+
+    // === Filter tanggal ===
+    if (!empty($dateFilter)) {
+        if ($dateFilter === 'today') {
+            $query->whereDate('orders.created_at', Carbon::today());
+        } elseif ($dateFilter === '7days') {
+            $query->where('orders.created_at', '>=', Carbon::now()->subDays(7));
+        } elseif ($dateFilter === '30days') {
+            $query->where('orders.created_at', '>=', Carbon::now()->subDays(30));
+        } elseif ($dateFilter === 'range' && $startDate && $endDate) {
+            $query->whereBetween('orders.created_at', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+    }
+
+    // === Summary total (tanpa pagination) ===
+    $summary = (clone $query)->get();
+    $totals = [
+        'total_items_sold' => $summary->sum('total_sold'),
+        'total_revenue' => $summary->sum('total_revenue'),
+    ];
+
+    // === Pagination ===
+    $reports = $query->paginate(10);
+
+    return response()->json([
+        'status' => $status,
+        'summary' => $totals,
+        'data' => $reports,
+    ]);
+    }
+
 }

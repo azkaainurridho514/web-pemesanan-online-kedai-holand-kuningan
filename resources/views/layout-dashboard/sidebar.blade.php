@@ -18,6 +18,11 @@
                     <i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Order</span>
                 </a>
             </li>
+            <li class="sidebar-item {{ request()->is('admin/history*') ? 'active' : '' }}">
+                <a class="sidebar-link" href="/admin/history">
+                    <i class="align-middle" data-feather="rotate-ccw"></i> <span class="align-middle">History</span>
+                </a>
+            </li>
             {{-- <li class="sidebar-item {{ request()->is('admin/cashier*') ? 'active' : '' }}">
                 <a class="sidebar-link" href="/admin/cashier">
                     <i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Cashier</span>
