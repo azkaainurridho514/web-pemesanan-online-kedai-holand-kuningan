@@ -188,13 +188,11 @@ $(document).ready(function () {
                 name: name,
                 phone: phone,
                 table_number: table_number,
-                // _token: $('meta[name="csrf-token"]').attr('content')
             },
             xhrFields: { withCredentials: true },
             success: function (res) {
                 loadCart();
                 loadHistory();
-
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
@@ -202,7 +200,6 @@ $(document).ready(function () {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#3085d6'
                 });
-
                 $.ajax({
                     url: '/broadcast-order',
                     type: 'POST',
@@ -225,7 +222,7 @@ $(document).ready(function () {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#3085d6'
                 });
-                console.log('Error checkout:', xhr.responseText);
+                console.log('Error checkout:', error);
             }
         });
     }

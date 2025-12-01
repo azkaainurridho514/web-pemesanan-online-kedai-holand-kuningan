@@ -1,5 +1,5 @@
 <header id="header" id="home">
-    <div class="header-top">
+    {{-- <div class="header-top">
         <div class="container">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-sm-4 col-8 header-top-right no-padding">
@@ -17,7 +17,7 @@
                 </div>
             </div>			  					
         </div>
-    </div>			  	
+    </div>			  	 --}}
     <div class="container">
         <div class="row align-items-center justify-content-between d-flex">
             <div id="logo">
@@ -25,4 +25,4 @@
             </div>
         </div>
     </div>
-</header><!-- #header -->
+</header>

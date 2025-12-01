@@ -6,8 +6,9 @@
     <div class="single-footer-widget">
         <div class="menu-content pb-60">
             <div class="title text-center">
-                <h1 class="mb-10">What kind of Coffee we serve for you</h1>
-                <p>Who are in extremely love with eco friendly system.</p>
+                <h1 class="mb-10">Mau pesan apa hari ini?</h1>
+                <p>Pilih makanan dan minuman favoritmu langsung dari menu kami.</p>
+
             </div>
         </div>
     </div>
