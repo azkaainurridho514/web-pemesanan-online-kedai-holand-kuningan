@@ -47,7 +47,7 @@
                 <div class="percentage">Kode Pesanan</div>
                 <div class="percentage">Tanggal</div>
                 <div class="percentage">Total Pesanan</div>
-                <div class="percentage">Status</div>
+                <div class="percentage">Harga</div>
                 <div class="visit">Status</div>
             </div>
             <div id="orderTable"></div>
@@ -188,6 +188,7 @@ $(document).ready(function () {
                 name: name,
                 phone: phone,
                 table_number: table_number,
+                _token: '{{ csrf_token() }}'
             },
             xhrFields: { withCredentials: true },
             success: function (res) {
@@ -199,19 +200,6 @@ $(document).ready(function () {
                     text: 'Pesanan berhasil dibuat.',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#3085d6'
-                });
-                $.ajax({
-                    url: '/broadcast-order',
-                    type: 'POST',
-                    data: {
-                        type: 'info',
-                        title: 'ADA PESANAN',
-                        message: `Pesanan masuk dari ${name}`,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    xhrFields: { withCredentials: true }
-                }).fail(function (err) {
-                    console.log('Broadcast gagal:', err);
                 });
             },
             error: function (xhr, status, error) {

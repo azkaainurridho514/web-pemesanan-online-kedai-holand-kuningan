@@ -8,28 +8,29 @@
     <div class="col-lg-6">
         <div class="card flex-fill">
             <div class="card-header">
-                <div class="card-title row mb-3 mt-3">
-                    <div class="col-lg-12 d-flex flex-wrap gap-2 mb-2 align-items-center">
-                        <select id="selectPeriodSelesai" class="form-select" style="max-width: 180px;">
-                            <option value="0">Semua</option>
-                            <option value="1">Hari ini</option>
-                            <option value="2">Satu minggu</option>
-                            <option value="3">Satu bulan</option>
-                            <option value="4">Satu tahun</option>
-                            <option value="5">Custom Range</option>
-                        </select>
-                        <input type="date" id="startDateSelesai" class="form-control d-none" style="max-width: 180px;">
-                        <i data-feather="arrow-right" class="d-none" id="toSelesai"></i>
-                        <input type="date" id="endDateSelesai" class="form-control d-none" style="max-width: 180px;">
-
-                        <button id="btnFilterSelesai" class="btn btn-secondary">
-                            <i data-feather="filter"></i> Terapkan
-                        </button>
-                        <button id="btnDownloadSelesai" class="btn btn-primary">
-                            <i data-feather="download"></i> Download
-                        </button>
+                    <div class="card-title row mb-3 mt-3">
+                        <div class="col-lg-12 d-flex flex-wrap gap-2 mb-2 align-items-center">
+                            <select id="selectPeriodSelesai" class="form-select" style="max-width: 180px;">
+                                <option value="0">Semua</option>
+                                <option value="1">Hari ini</option>
+                                <option value="2">Satu minggu</option>
+                                <option value="3">Satu bulan</option>
+                                <option value="4">Satu tahun</option>
+                                <option value="5">Custom Range</option>
+                            </select>
+                            <input type="date" id="startDateSelesai" class="form-control d-none" style="max-width: 180px;">
+                            <i data-feather="arrow-right" class="d-none" id="toSelesai"></i>
+                            <input type="date" id="endDateSelesai" class="form-control d-none" style="max-width: 180px;">
+    
+                            <button id="btnFilterSelesai" class="btn btn-secondary">
+                                <i data-feather="filter"></i> Terapkan
+                            </button>
+                            <button id="btnDownloadSelesai" class="btn btn-primary">
+                                <i data-feather="download"></i> Download Penjualan
+                            </button>
+                        </div>
                     </div>
-                </div>
+               
             </div>
             <table class="table table-hover">
                 <thead>
@@ -67,7 +68,7 @@
                             <i data-feather="filter"></i> Terapkan
                         </button>
                         <button id="btnDownloadBatal" class="btn btn-primary">
-                            <i data-feather="download"></i> Download
+                            <i data-feather="download"></i> Download Pembatalan
                         </button>
                     </div>
                 </div>

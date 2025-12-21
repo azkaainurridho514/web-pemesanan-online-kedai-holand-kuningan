@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Events\OrderEvent;
 
 class CartController extends Controller
 {
@@ -97,7 +98,7 @@ class CartController extends Controller
     public function clear(Request $request)
     {
         $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
-        $cookieData = array_filter($cookieData, fn($c) => $c['is_order'] === true); // sisakan history
+        $cookieData = array_filter($cookieData, fn($c) => $c['is_order'] === true);
 
         $cookieData[] = ['is_order' => false, 'cart' => []];
 
@@ -108,6 +109,7 @@ class CartController extends Controller
     
     public function placeOrder(Request $request)
     {
+        logger('PLACE ORDER CALLED', $request->all());
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -163,6 +165,12 @@ class CartController extends Controller
         $cookieData[] = ['is_order' => false, 'cart' => []];
 
         $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
+
+        broadcast(new OrderEvent(
+            'info',
+            'ADA PESANAN',
+            'Pesanan masuk dari ' . $request->name
+        ));
 
         return response()->json([
             'message' => 'Pesanan berhasil dibuat!',

@@ -19,10 +19,18 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/login-admin', [AuthController::class, 'index'])->name('login-admin');
 });
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'view']);
+    Route::get('/data', [CartController::class, 'getData']);
+    Route::get('/history', [CartController::class, 'getHistory']);
+    Route::post('/add', [CartController::class, 'addOrUpdate']);
+    Route::post('/checkout', [CartController::class, 'placeOrder']);
+    Route::delete('/remove/{menu_id}', [CartController::class, 'remove']);
+    Route::delete('/clear', [CartController::class, 'clear']);
+});
 Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->group(function(){
-        Route::redirect('/', '/admin/order');
-        Route::redirect('/dashboard', '/admin/order');
+        Route::redirect('/', '/admin/dashboard');
         Route::get('dashboard', [DashboardController::class, 'index']);
         Route::get('header', [HomeController::class, 'headerView']);
         Route::get('footer', [HomeController::class, 'footerView']);
@@ -33,21 +41,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('category', [MenuController::class, 'categoryView']);
         Route::get('option', [MenuController::class, 'optionView']);
     });
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'view']);
-        Route::get('/data', [CartController::class, 'getData']);
-        Route::get('/history', [CartController::class, 'getHistory']);
-        Route::post('/add', [CartController::class, 'addOrUpdate']);
-        Route::post('/checkout', [CartController::class, 'placeOrder']);
-        Route::delete('/remove/{menu_id}', [CartController::class, 'remove']);
-        Route::delete('/clear', [CartController::class, 'clear']);
-    });
     Route::prefix('order')->group(function () {
         Route::get('/data', [OrderController::class, 'dataOrder']);
         Route::get('/data/info', [OrderController::class, 'dataOrderInfo']);
         Route::get('/data-report', [OrderController::class, 'dataReport']);
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::put('/{id}/status', [OrderController::class, 'updateStatus']);
+    });
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{id}', [UserController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
     });
 });
 

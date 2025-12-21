@@ -111,16 +111,6 @@
                     <button id="btnAdd" class="btn btn-primary " data-method='add'>
                         <i data-feather="plus"></i> Buat Order
                     </button>
-                    <select id="selectPeriod" class="form-select" style="max-width: 180px;">
-                        <option value="0">Semua</option>
-                        <option value="1">Hari ini</option>
-                        <option value="2">Satu minggu</option>
-                        <option value="3">Satu bulan</option>
-                        <option value="4">Satu tahun</option>
-                    </select>
-                    <button id="btnDownloadPeriod" class="btn btn-primary">
-                        <i data-feather="download"></i> Download
-                    </button>
                 </div>
                 <div class="col-lg-6 d-flex gap-2 mb-2">
                     <input type="text" id="search" class="form-control" placeholder="Cari nama / meja / metode...">
@@ -141,7 +131,7 @@
                     <th>Table Number</th>
                     <th class="d-none d-xl-table-cell">Order Code</th>
                     <th class="d-none d-xl-table-cell">Total Price</th>
-                    <th class="d-none d-xl-table-cell">Payment Method</th>
+                    {{-- <th class="d-none d-xl-table-cell">Payment Method</th> --}}
                     <th class="d-none d-xl-table-cell">Status</th>
                     <th>Action</th>
                 </tr>
@@ -454,7 +444,7 @@
                         <td>${order.table_number ?? '-'}</td>
                         <td class="d-none d-xl-table-cell">${order.order_code ?? '-'}</td>
                         <td class="d-none d-xl-table-cell">Rp ${Number(order.total_price || 0).toLocaleString('id-ID')}</td>
-                        <td class="d-none d-xl-table-cell">${order.payment_method ?? '-'}</td>
+                       
                         <td class="d-none d-xl-table-cell">
                             <span class="badge ${badgeClass} text-uppercase">${order.status ?? '-'}</span>
                         </td>
@@ -819,7 +809,8 @@
                 name: name,
                 phone: phone,
                 table_number: table_number,
-                products: products
+                products: products,
+                _token: '{{ csrf_token() }}'
             };
 
             let isEdit = id !== "" && id !== null;

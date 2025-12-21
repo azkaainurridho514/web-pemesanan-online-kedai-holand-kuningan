@@ -13,6 +13,7 @@ use App\Models\OrderItem;
 use App\Models\OrderLog;
 use App\Models\User;
 use App\Models\Option;
+use App\Models\Role;
 use App\Models\OptionItems;
 use Carbon\Carbon;
 
@@ -23,10 +24,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        Role::create([
+            'name' => 'Owner',
+        ]);
+        Role::create([
+            'name' => 'Karyawan',
+        ]);
+        User::create([
+            'name' => 'Owner Kedai Holand',
+            'email' => 'ownerkedaiholand@gmail.com',
+            'password' => Hash::make('kedaiholand123'),
+            'role_id' => 1
+        ]);
         User::create([
             'name' => 'Admin Kedai Holand',
             'email' => 'adminkedaiholand@gmail.com',
             'password' => Hash::make('kedaiholand123'),
+            'role_id' => 2
         ]);
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');

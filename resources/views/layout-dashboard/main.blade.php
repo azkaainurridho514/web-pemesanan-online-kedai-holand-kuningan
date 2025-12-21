@@ -80,9 +80,6 @@
 						$.ajax({
 							url: "{{ route('logout') }}",
 							type: "POST",
-							data: {
-								_token: "{{ csrf_token() }}"
-							},
 							success: function(res) {
 								window.location.href = res.redirect;
 							},
@@ -95,9 +92,12 @@
 					}
 				});
 			});
-
-
-
+			// jQuery AJAX CSRF setup
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				}
+			});
 			document.addEventListener("DOMContentLoaded", function() {
 				Echo.channel(`order-event`)
 				.listen('OrderEvent', (e) => {

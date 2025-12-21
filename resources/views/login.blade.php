@@ -16,7 +16,6 @@
                                 <div class="text-center">
                                 </div>
                                 <form id="form-login">
-                                    @csrf
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
                                         <input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
@@ -55,42 +54,46 @@
     </div>
 </main>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $("#form-login").on("submit", function(e){
-            e.preventDefault();
-        
-            $("#btn-login").prop("disabled", true).text("Processing...");
-        
-            let formData = $(this).serializeArray();  
-        
-            $.ajax({
-                url: "/login",
-                type: "POST",
-                data: $.param(formData),
-                success: function(res) {
-                    window.location.href = res.redirect;
-                },
-                error: function(err) {
-                    console.log(err)
-                    $("#btn-login").prop("disabled", false).text("Sign in");
-        
-                    if (err.status === 422) {
-                        let errors = err.responseJSON.errors;
-                        if (errors.email) $(".error-email").text(errors.email[0]);
-                        if (errors.password) $(".error-password").text(errors.password[0]);
-                    }
-        
-                    if (err.status === 401) {
-                        $("#error-global").removeClass("d-none")
-                            .text(err.responseJSON.message);
-                    }
-                }
-            });
-        });
-    });
 
-</script>
 
 @endsection
+
+@push('stack-auth')
+    <script>
+        $(document).ready(function () {
+            $("#form-login").on("submit", function(e){
+                e.preventDefault();
+            
+                $("#btn-login").prop("disabled", true).text("Processing...");
+            
+                let formData = $(this).serializeArray();  
+                formData.push({name: "_token", value: $('meta[name="csrf-token"]').attr('content')});
+            
+                $.ajax({
+                    url: "/login",
+                    type: "POST",
+                    data: $.param(formData),
+                    success: function(res) {
+                        window.location.href = res.redirect;
+                    },
+                    error: function(err) {
+                        console.log(err)
+                        $("#btn-login").prop("disabled", false).text("Sign in");
+            
+                        if (err.status === 422) {
+                            let errors = err.responseJSON.errors;
+                            if (errors.email) $(".error-email").text(errors.email[0]);
+                            if (errors.password) $(".error-password").text(errors.password[0]);
+                        }
+            
+                        if (err.status === 401) {
+                            $("#error-global").removeClass("d-none")
+                                .text(err.responseJSON.message);
+                        }
+                    }
+                });
+            });
+        });
+
+    </script>
+@endpush

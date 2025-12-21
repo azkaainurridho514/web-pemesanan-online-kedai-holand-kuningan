@@ -9,43 +9,52 @@
                     <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
                 </a>
             </li> --}}
-            
-            <li class="sidebar-header">
-                ORDERS
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/order*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/order">
-                    <i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Order</span>
-                </a>
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/history*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/history">
-                    <i class="align-middle" data-feather="rotate-ccw"></i> <span class="align-middle">History</span>
-                </a>
-            </li>
-            {{-- <li class="sidebar-item {{ request()->is('admin/cashier*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/cashier">
-                    <i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Cashier</span>
-                </a>
-            </li> --}}
-            <li class="sidebar-header">
-                MENUS
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/menu*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/menu">
-                    <i class="align-middle" data-feather="shopping-bag"></i> <span class="align-middle">Menu</span>
-                </a>
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/category*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/category">
-                    <i class="align-middle" data-feather="book"></i> <span class="align-middle">Category</span>
-                </a>
-            </li>
-            <li class="sidebar-item {{ request()->is('admin/option*') ? 'active' : '' }}">
-                <a class="sidebar-link" href="/admin/option">
-                    <i class="align-middle" data-feather="git-commit"></i> <span class="align-middle">Option</span>
-                </a>
-            </li>
+            @if(auth()->user()->role_id == 1)
+                <li class="sidebar-header">
+                    Report
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/history*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/history">
+                        <i class="align-middle" data-feather="rotate-ccw"></i> <span class="align-middle">History</span>
+                    </a>
+                </li>
+                <li class="sidebar-header">
+                    Users
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/user*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/user">
+                        <i class="align-middle" data-feather="users"></i> <span class="align-middle">User</span>
+                    </a>
+                </li>
+            @endif
+            @if(auth()->user()->role_id == 2)
+                <li class="sidebar-header">
+                    ORDERS
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/order*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/order">
+                        <i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Order</span>
+                    </a>
+                </li>
+                <li class="sidebar-header">
+                    MENUS
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/menu*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/menu">
+                        <i class="align-middle" data-feather="shopping-bag"></i> <span class="align-middle">Menu</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/category*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/category">
+                        <i class="align-middle" data-feather="book"></i> <span class="align-middle">Category</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ request()->is('admin/option*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/option">
+                        <i class="align-middle" data-feather="git-commit"></i> <span class="align-middle">Option</span>
+                    </a>
+                </li>
+            @endif
             {{-- <li class="sidebar-header">
                 ADDITIONAL HOME PAGE
             </li>
