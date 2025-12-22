@@ -4,7 +4,7 @@
     </a>
 
     <div class="navbar-collapse collapse">
-        <ul class="navbar-nav navbar-align">
+        {{-- <ul class="navbar-nav navbar-align">
             <li class="nav-item dropdown">
                 <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
                     <i class="align-middle" data-feather="settings"></i>
@@ -22,6 +22,6 @@
                     <a class="dropdown-item" href="#">Log out</a>
                 </div>
             </li>
-        </ul>
+        </ul> --}}
     </div>
 </nav>

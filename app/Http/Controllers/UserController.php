@@ -3,189 +3,123 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of users (kasir only)
-     */
-    public function index(Request $request)
+    public function userView(){
+        return view('dashboard.home.user');
+    }
+    public function getData(Request $request)
     {
-        $query = User::with('role')->where('role_id', 2); // Hanya kasir
-
-        // Search functionality
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
+        $search = $request->search;
+        $query = User::with('role')->where('role_id', 2);
+        
+        if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
-
-        $users = $query->latest()->paginate(10);
-
+        
+        $data = $query->latest()->get();
+        
         return response()->json([
-            'data' => $users->items(),
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-                'total' => $users->total(),
-            ]
+            'success' => true,
+            'data' => $data
         ]);
     }
 
-    /**
-     * Store a newly created kasir
-     */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:15|regex:/^[0-9+\-\s()]*$/',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'plain_password' => $validated['password'],
+            'phone' => $validated['phone'],
+            'role_id' => 2,
+        ]);
 
-        try {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role_id' => 2, // Hardcode ke kasir
-            ]);
-
-            return response()->json([
-                'message' => 'Kasir berhasil ditambahkan',
-                'data' => $user->load('role')
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal menambahkan kasir: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Kasir berhasil ditambahkan',
+            'data' => $user->load('role')
+        ], 201);
     }
 
-    /**
-     * Display the specified kasir
-     */
-    public function show(string $id)
+    public function show($id)
     {
-        try {
-            $user = User::with('role')
-                ->where('role_id', 2)
-                ->findOrFail($id);
-            return response()->json(['data' => $user]);
-        } catch (\Exception $e) {
+        $user = User::with('role')
+            ->where('role_id', 2)
+            ->findOrFail($id);
+            
+        return response()->json($user);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::where('role_id', 2)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($validated['password']);
+            $data['plain_password'] = $validated['password']; 
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Kasir berhasil diperbarui'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $user = User::where('role_id', 2)->find($id);
+
+        if (!$user) {
             return response()->json([
-                'message' => 'Kasir tidak ditemukan'
+                'message' => 'Kasir tidak ditemukan.'
             ], 404);
         }
-    }
 
-    /**
-     * Show the form for editing the specified kasir
-     */
-    public function edit(string $id)
-    {
-        try {
-            $user = User::with('role')
-                ->where('role_id', 2)
-                ->findOrFail($id);
-            
-            return response()->json(['data' => $user]);
-        } catch (\Exception $e) {
+        if (auth()->id() === $user->id) {
             return response()->json([
-                'message' => 'Kasir tidak ditemukan'
-            ], 404);
+                'message' => 'Anda tidak dapat menghapus akun sendiri.'
+            ], 400);
         }
-    }
 
-    /**
-     * Update the specified kasir
-     */
-    public function update(Request $request, string $id)
-    {
-        try {
-            $user = User::where('role_id', 2)->findOrFail($id);
+        $user->delete();
 
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => [
-                    'required',
-                    'string',
-                    'email',
-                    'max:255',
-                    Rule::unique('users')->ignore($user->id)
-                ],
-                'password' => 'nullable|string|min:8|confirmed',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $data = [
-                'name' => $request->name,
-                'email' => $request->email,
-            ];
-
-            // Only update password if provided
-            if ($request->filled('password')) {
-                $data['password'] = Hash::make($request->password);
-            }
-
-            $user->update($data);
-
-            return response()->json([
-                'message' => 'Kasir berhasil diperbarui',
-                'data' => $user->load('role')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal memperbarui kasir: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Remove the specified kasir
-     */
-    public function destroy(string $id)
-    {
-        try {
-            $user = User::where('role_id', 2)->findOrFail($id);
-            
-            // Prevent deleting own account
-            if (auth()->id() === $user->id) {
-                return response()->json([
-                    'message' => 'Anda tidak dapat menghapus akun sendiri'
-                ], 403);
-            }
-
-            $user->delete();
-
-            return response()->json([
-                'message' => 'Kasir berhasil dihapus'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal menghapus kasir: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Kasir berhasil dihapus.'
+        ], 200);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use App\Events\OrderEvent;
 use App\Http\Controllers\OrderExportController;
 
@@ -39,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('history', [OrderController::class, 'reportView']);
         Route::get('menu', [MenuController::class, 'menuView']);
         Route::get('category', [MenuController::class, 'categoryView']);
+        Route::get('user', [UserController::class, 'userView']);
         Route::get('option', [MenuController::class, 'optionView']);
     });
     Route::prefix('order')->group(function () {
@@ -47,15 +49,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/data-report', [OrderController::class, 'dataReport']);
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::put('/{id}/status', [OrderController::class, 'updateStatus']);
-    });
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/create', [UserController::class, 'create'])->name('create');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::get('/{id}', [UserController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [UserController::class, 'update'])->name('update');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
     });
 });
 

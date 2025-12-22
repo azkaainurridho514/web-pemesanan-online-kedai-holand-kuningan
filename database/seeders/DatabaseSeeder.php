@@ -34,12 +34,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Owner Kedai Holand',
             'email' => 'ownerkedaiholand@gmail.com',
             'password' => Hash::make('kedaiholand123'),
+            'phone' => "084644645677",
             'role_id' => 1
         ]);
         User::create([
             'name' => 'Admin Kedai Holand',
             'email' => 'adminkedaiholand@gmail.com',
             'password' => Hash::make('kedaiholand123'),
+            'phone' => "084644645677",
             'role_id' => 2
         ]);
 

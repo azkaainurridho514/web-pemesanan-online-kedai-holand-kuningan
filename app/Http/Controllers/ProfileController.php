@@ -84,9 +84,6 @@ class ProfileController extends Controller
         }
     }
 
-    /**
-     * Change owner password
-     */
     public function changePassword(Request $request)
     {
         try {
