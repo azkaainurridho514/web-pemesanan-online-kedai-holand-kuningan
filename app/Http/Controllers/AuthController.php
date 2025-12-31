@@ -27,7 +27,6 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        // langsung validate tanpa remember
         if (!auth()->attempt($credentials)) {
             return response()->json([
                 'status' => false,

@@ -109,31 +109,25 @@ class CartController extends Controller
     
     public function placeOrder(Request $request)
     {
-        logger('PLACE ORDER CALLED', $request->all());
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'table_number' => 'required|string|max:20',
         ]);
-
         $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
-
         $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
         if ($activeCartIndex === false) {
             return response()->json(['message' => 'Keranjang kosong!'], 400);
         }
-
         $cart = $cookieData[$activeCartIndex]['cart'];
         if (empty($cart)) {
             return response()->json(['message' => 'Keranjang kosong!'], 400);
         }
-
         $totalPrice = 0;
         foreach ($cart as $item) {
             $harga = (int) preg_replace('/[^0-9]/', '', $item['harga']);
             $totalPrice += $harga * (int) $item['qty'];
         }
-
         $order = Order::create([
             'id' => Str::uuid(),
             'order_code' => 'ORD-' . strtoupper(Str::random(6)),
@@ -144,7 +138,6 @@ class CartController extends Controller
             'payment_method' => "cash",
             'status' => 'menunggu',
         ]);
-
         foreach ($cart as $item) {
             $harga = (int) preg_replace('/[^0-9]/', '', $item['harga']);
             $subtotal = $harga * (int) $item['qty'];
@@ -157,21 +150,16 @@ class CartController extends Controller
                 'note' => $item['desc'] ?? "",
             ]);
         }
-
         $cookieData[$activeCartIndex]['is_order'] = true;
         $cookieData[$activeCartIndex]['date'] = now()->format('Y-m-d H:i:s');
         $cookieData[$activeCartIndex]['order_code'] = $order->order_code;
-
         $cookieData[] = ['is_order' => false, 'cart' => []];
-
         $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
-
         broadcast(new OrderEvent(
             'info',
             'ADA PESANAN',
             'Pesanan masuk dari ' . $request->name
         ));
-
         return response()->json([
             'message' => 'Pesanan berhasil dibuat!',
             'order_code' => $order->order_code,
