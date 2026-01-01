@@ -1,6 +1,21 @@
 @extends('layout-home.main')
 
 @section('title', "HOME")
+@push('style')
+    <style>
+        .img-product-preview{
+            max-height:180px;
+            object-fit:cover;
+            cursor: pointer;
+        }
+        .img-product-preview:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
+            transition: 0.2s;
+        }
+
+    </style>
+@endpush
 @section('main')
 <div class="row d-flex justify-content-center">
     <div class="single-footer-widget">
@@ -53,11 +68,40 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalPreviewImage" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Preview Gambar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage"
+                     src=""
+                     class="img-fluid rounded"
+                     style="max-height:70vh;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @endsection
 @push('script-js')
 
 <script>
 $(document).ready(function() {
+    $(document).on('click', '.img-product-preview', function () {
+        const photo = $(this).data('photo');
+        $('#previewImage').attr('src', photo);
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('modalPreviewImage')
+        );
+        modal.show();
+    });
 
 
     function getDataProducts(search = '', category = '') {
@@ -98,6 +142,14 @@ $(document).ready(function() {
             html += `
             <div class="col-md-4">
                 <div class="single-menu">
+                    ${item.photo ? `
+                        <div class="mb-2 text-center">
+                            <img  loading="lazy" src="/storage/product/${item.photo}"
+                                alt="${item.name}"
+                                data-photo="/storage/product/${item.photo}"
+                                class="img-fluid product-img rounded img-product-preview">
+                        </div>
+                    ` : ''}
                     <h4 class="mb-2">${item.name}</h4>
                     <p class="price">
                         ${item.price}

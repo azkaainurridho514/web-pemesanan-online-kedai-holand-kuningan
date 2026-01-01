@@ -1,6 +1,13 @@
 @extends('layout-dashboard.main')
 @section('title', "Kedai Holand | Menu")    
 @section('title-page', "Menu")    
+@push('style')
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
+@endpush
 @section('main')
 <div class="card flex-fill w-100">
     <div class="card flex-fill">
@@ -34,6 +41,7 @@
                 <tr>
                     <th class="text-center">No</th>
                     <th>Name</th>
+                    <th>Photo</th>
                     <th>Description</th>
                     <th>Price</th>
                     <th class="d-none d-xl-table-cell text-center">Category</th>
@@ -61,6 +69,24 @@
   </div>
 </div>
 
+<div class="modal fade" id="photoPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Preview Foto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="photoPreviewImage"
+                     src=""
+                     class="img-fluid rounded"
+                     style="max-height:70vh;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @endsection
 @push('script') 
 <script>
@@ -70,7 +96,6 @@ $(document).ready(function () {
         const category = $('#filterCategory').val();
         const option = $('#filterOption').val();
         const available = $('#filterAvailable').val();
-        console.log(search)
         $.ajax({
             url: `/api/get-data/product-dashboard?page=${page}`,
             method: 'GET',
@@ -108,6 +133,16 @@ $(document).ready(function () {
                         <tr>
                             <td class="text-center">${(res.from ?? 1) + i}</td>
                             <td>${product.name}</td>
+                            <td class="text-center">
+                                ${product.photo
+                                    ? `<img src="/storage/product/${product.photo}"
+                                            alt="Photo"
+                                            class="img-thumbnail img-preview cursor-pointer"
+                                            data-photo="/storage/product/${product.photo}"
+                                            style="width:100px;height:100px;object-fit:cover;">`
+                                    : `<span class="text-muted">-</span>`
+                                }
+                            </td>
                             <td>${product.description ?? '-'}</td>
                             <td>Rp ${product.price.toLocaleString('id-ID')}</td>
                             <td class="text-center">${product.category_name ?? '-'}</td>
@@ -130,6 +165,11 @@ $(document).ready(function () {
                 });
 
                 $('#tableProducts tbody').html(rows);
+                $(document).on('click', '.img-preview', function () {
+                    const photo = $(this).data('photo');
+                    $('#photoPreviewImage').attr('src', photo);
+                    $('#photoPreviewModal').modal('show');
+                });
                 if (typeof feather !== 'undefined') feather.replace();
                 renderPagination(res);
             },
@@ -240,7 +280,7 @@ $(document).ready(function () {
             });
 
             const html = `
-                <form id="formMenu">
+                <form id="formMenu" enctype="multipart/form-data">
                     <input type="hidden" id="menuId" value="${product.id}">
 
                     <div class="mb-3">
@@ -268,6 +308,31 @@ $(document).ready(function () {
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Foto</label>
+                       <div class="d-flex gap-5">
+                            ${product.photo ? `
+                                <div class="mb-2" id="oldPhoto">
+                                    <small class="text-muted d-block mb-1">Foto Lama:</small>
+                                    <img src="/storage/product/${product.photo}" 
+                                        alt="Product Photo" 
+                                        class="img-thumbnail"
+                                        style="max-width: 200px;">
+                                </div>
+                            ` : ''}
+
+                            <div class="mb-2" id="previewPhotoEdit" style="display:none;">
+                                <small class="text-success d-block mb-1">Foto Baru:</small>
+                                <img id="previewImageEdit" 
+                                    src="" 
+                                    alt="Preview" 
+                                    class="img-thumbnail"
+                                    style="max-width: 200px;">
+                            </div>
+                        </div>
+                        <input type="file" id="menuPhoto" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Deskripsi</label>
                         <input type="text" id="menuDesc" class="form-control" value="${product.description ?? ""}">
                     </div>
@@ -283,11 +348,94 @@ $(document).ready(function () {
             `;
 
             $('#modalMenu .modal-body').html(html);
+            $(document).on('change', '#menuPhoto', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImageEdit').attr('src', e.target.result);
+                        $('#previewPhotoEdit').show();
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#previewPhotoEdit').hide();
+                }
+            });
             feather.replace();
         }).fail(() => {
             $('#modalMenu .modal-body').html('<p class="text-danger">Gagal memuat data menu.</p>');
         });
     });
+
+    // $(document).on('click', '#btnSaveMenu', function(e) {
+    //     e.preventDefault();
+
+    //     const id = $('#menuId').val();
+    //     const name = $('#menuName').val().trim();
+    //     const category = $('#menuCategory').val();
+    //     const option = $('#menuOption').val();
+    //     const desc = $('#menuDesc').val();
+    //     const price = $('#menuPrice').val();
+    //     const photoFile = $('#menuPhoto')[0].files[0]; 
+    //     const status = $('#menuStatus').val();
+
+    //     if (!name || !category || !price || !status) {
+    //         Swal.fire({
+    //             icon: 'warning',
+    //             title: 'Data belum lengkap',
+    //             text: 'Semua field wajib diisi kecuali Opsi.',
+    //             confirmButtonText: 'OK',
+    //             confirmButtonColor: '#3085d6'
+    //         });
+    //         return;
+    //     }
+
+    //     $.ajax({
+    //         url: `/api/update-data/product/${id}`,
+    //         method: 'PUT',
+    //         data: {
+    //             name: name,
+    //             category_id: category,
+    //             option_id: option || "", 
+    //             price: price,
+    //             photo: photo,
+    //             description: desc || "",
+    //             is_available: status,
+    //             _token: $('meta[name="csrf-token"]').attr('content')
+    //         },
+    //         beforeSend: function() {
+    //             $('#btnSaveMenu')
+    //                 .prop('disabled', true)
+    //                 .html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
+    //         },
+    //         success: function(res) {
+    //             $('#modalMenu').modal('hide');
+    //             Swal.fire({
+    //                 icon: 'success',
+    //                 title: 'Berhasil!',
+    //                 text: 'Data menu berhasil diperbarui.',
+    //                 timer: 2000,
+    //                 showConfirmButton: false
+    //             });
+
+    //             loadProducts(); 
+    //         },
+    //         error: function(err) {
+    //             console.log(err)
+    //             Swal.fire({
+    //                 icon: 'error',
+    //                 title: 'Gagal!',
+    //                 text: 'Terjadi kesalahan saat menyimpan data.',
+    //                 confirmButtonText: 'Coba Lagi'
+    //             });
+    //         },
+    //         complete: function() {
+    //             $('#btnSaveMenu')
+    //                 .prop('disabled', false)
+    //                 .html('Simpan');
+    //         }
+    //     });
+    // });
 
     $(document).on('click', '#btnSaveMenu', function(e) {
         e.preventDefault();
@@ -298,6 +446,7 @@ $(document).ready(function () {
         const option = $('#menuOption').val();
         const desc = $('#menuDesc').val();
         const price = $('#menuPrice').val();
+        const photoFile = $('#menuPhoto')[0].files[0];
         const status = $('#menuStatus').val();
 
         if (!name || !category || !price || !status) {
@@ -311,17 +460,27 @@ $(document).ready(function () {
             return;
         }
 
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('category_id', category);
+        formData.append('option_id', option || "");
+        formData.append('price', price);
+        formData.append('description', desc || "");
+        formData.append('is_available', status);
+        formData.append('_method', 'PUT'); 
+        
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
+
         $.ajax({
             url: `/api/update-data/product/${id}`,
-            method: 'PUT',
-            data: {
-                name: name,
-                category_id: category,
-                option_id: option || "", 
-                price: price,
-                description: desc || "",
-                is_available: status,
-                _token: $('meta[name="csrf-token"]').attr('content')
+            method: 'POST', 
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             beforeSend: function() {
                 $('#btnSaveMenu')
@@ -341,11 +500,17 @@ $(document).ready(function () {
                 loadProducts(); 
             },
             error: function(err) {
-                console.log(err)
+                console.log(err);
+                let errorMsg = 'Terjadi kesalahan saat menyimpan data.';
+                
+                if (err.responseJSON && err.responseJSON.errors) {
+                    errorMsg = Object.values(err.responseJSON.errors).flat().join('\n');
+                }
+                
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal!',
-                    text: 'Terjadi kesalahan saat menyimpan data.',
+                    text: errorMsg,
                     confirmButtonText: 'Coba Lagi'
                 });
             },
@@ -393,7 +558,7 @@ $(document).ready(function () {
             });
 
             const html = `
-                <form id="formAddMenu">
+                <form id="formAddMenu" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label">Nama Menu</label>
                         <input type="text" id="menuName" class="form-control" placeholder="Contoh: Nasi Goreng Spesial" required>
@@ -419,6 +584,14 @@ $(document).ready(function () {
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Foto</label>
+                        <input type="file" id="menuPhoto" class="form-control">
+                        <div class="mt-2" id="previewPhotoAdd" style="display:none;">
+                            <img id="previewImageAdd" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Deskripsi</label>
                         <input type="text" id="menuDesc" class="form-control">
                     </div>
@@ -432,13 +605,28 @@ $(document).ready(function () {
                     </div>
                 </form>
             `;
+            
 
             $('#modalMenu .modal-body').html(html);
+            $(document).on('change', '#menuPhoto', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImageAdd').attr('src', e.target.result);
+                        $('#previewPhotoAdd').show();
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#previewPhotoAdd').hide();
+                }
+            });
             feather.replace();
         }).fail(() => {
             $('#modalMenu .modal-body').html('<p class="text-danger">Gagal memuat data kategori dan opsi.</p>');
         });
     });
+    
 
     $(document).on('click', '#btnSaveNewMenu', function(e) {
         e.preventDefault();
@@ -448,6 +636,7 @@ $(document).ready(function () {
         const option = $('#menuOption').val();
         const desc = $('#menuDesc').val();
         const price = $('#menuPrice').val();
+        const photo = $('#menuPhoto').val();
         const status = $('#menuStatus').val();
 
         if (!name || !category || !price || status === '') {
@@ -466,6 +655,7 @@ $(document).ready(function () {
             category_id: category,
             option_id: option || "",
             price: price,
+            photo: photo,
             description: desc || "",
             is_available: status
         };

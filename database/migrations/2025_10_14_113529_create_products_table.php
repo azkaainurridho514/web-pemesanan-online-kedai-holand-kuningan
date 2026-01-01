@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid('option_id')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('photo')->nullable();
             $table->integer('price');
             $table->boolean('is_available')->default(true);
             $table->timestamps();

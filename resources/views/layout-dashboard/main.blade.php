@@ -42,6 +42,7 @@
 			overflow-x: auto;
 			}
 		</style>
+		@stack('style')
 	</head>
 
 	<body>

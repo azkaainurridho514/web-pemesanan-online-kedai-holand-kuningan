@@ -17,6 +17,7 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'photo',
         'is_available',
     ];
     protected static function boot()

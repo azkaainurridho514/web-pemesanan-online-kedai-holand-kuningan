@@ -57,6 +57,7 @@
         }
       </style>
 	  @vite('resources/css/app.css')
+	  @stack('style')
 		</head>
 		<body>
       @include('layout-home.header')

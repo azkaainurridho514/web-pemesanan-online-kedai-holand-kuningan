@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Option;
+use Illuminate\Support\Facades\Storage; 
 
 class ProductController extends Controller
 {
@@ -38,7 +39,7 @@ class ProductController extends Controller
 
     public function getDataDashboard(Request $request){
         $query = Product::with(['category:id,name', 'option:id,name'])
-        ->select('id', 'category_id', 'option_id', 'name', 'description', 'price', 'is_available');
+        ->select('id', 'category_id', 'option_id', 'name', 'description', 'price', 'photo', 'is_available');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', "%".$request->search."%");
@@ -66,6 +67,7 @@ class ProductController extends Controller
                 'name' => $item->name,
                 'description' => $item->description,
                 'price' => $item->price,
+                'photo' => $item->photo,
                 'category_name' => $item->category->name ?? '-',
                 'option_name' => $item->option->name ?? '-',
                 'is_available' => $item->is_available,
@@ -88,10 +90,62 @@ class ProductController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
+    { 
         $product = Product::findOrFail($id);
-        $product->update($request->only(['name', 'category_id', 'option_id', 'price', 'is_available', 'description']));
-        return response()->json(['message' => 'Product berhasil diperbarui']);
+    
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
+            'option_id' => 'nullable|exists:options,id',
+            'price' => 'nullable|numeric|min:0',
+            'is_available' => 'nullable|boolean',
+            'description' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+        ]);
+        
+        if ($request->hasFile('photo')) {
+            if ($product->photo && Storage::disk('public')->exists('product/' . $product->photo)) {
+                Storage::disk('public')->delete('product/' . $product->photo);
+            }
+            
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('product', $filename, 'public');
+            $validated['photo'] = $filename;
+        }
+        
+        $product->update($validated);
+        
+        return response()->json([
+            'message' => 'Product berhasil diperbarui',
+            'data' => $product
+        ]);
+    }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'is_available' => 'required|boolean',
+            'description' => 'nullable|string',  
+            'option_id' => 'nullable|exists:options,id',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048', 
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('product', $filename, 'public');
+            $validated['photo'] = $filename;
+        }
+
+        $product = Product::create($validated);
+
+        return response()->json([
+            'message' => 'Menu berhasil ditambahkan',
+            'data' => $product
+        ], 201);
     }
 
     public function masterFormData()
@@ -104,24 +158,6 @@ class ProductController extends Controller
             'options' => $options
         ]);
     }
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'is_available' => 'required|boolean',
-            'description' => 'nullable|string', 
-            'option_id' => 'nullable|exists:options,id',
-        ]);
-
-        $product = Product::create($validated);
-
-        return response()->json([
-            'message' => 'Menu berhasil ditambahkan',
-            'data' => $product
-        ], 201);
-    }
 
     public function destroy($id)
     {
@@ -131,6 +167,10 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'Menu tidak ditemukan.'
             ], 404);
+        }
+
+        if ($product->photo && Storage::disk('public')->exists('product/' . $product->photo)) {
+            Storage::disk('public')->delete('product/' . $product->photo);
         }
 
         $product->delete();
