@@ -10,10 +10,14 @@ export default defineConfig({
     ],
     server: {
         host: '0.0.0.0',
+        port: 5173,
         hmr: {
+            // host: '192.168.100.6',
             // host: '192.168.1.47', // wifi holand
             host: '192.168.100.6',   // wifi rumah
             // host: '192.168.18.30',
+            // host: '10.120.130.114',
+
         },
     },
 });

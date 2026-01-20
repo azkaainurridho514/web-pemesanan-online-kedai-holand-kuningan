@@ -72,7 +72,6 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Preview Gambar</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -147,7 +146,7 @@ $(document).ready(function() {
                             <img  loading="lazy" src="/storage/product/${item.photo}"
                                 alt="${item.name}"
                                 data-photo="/storage/product/${item.photo}"
-                                class="img-fluid product-img rounded img-product-preview">
+                                class="img-fluid product-img rounded img-product-preview" style="max-height: 200px; object-fit: cover;">
                         </div>
                     ` : ''}
                     <h4 class="mb-2">${item.name}</h4>
@@ -203,7 +202,7 @@ $(document).ready(function() {
                     qty: qty,
                     harga: harga,
                     desc: desc || option || "", 
-                    _token: '{{ csrf_token() }}'
+                    // _token: '{{ csrf_token() }}'
                 },
                 success: function (res) {
                     $('#modal').modal('hide');

@@ -209,14 +209,12 @@ class OrderController extends Controller
     $startDate = $request->query('start_date');
     $endDate = $request->query('end_date');
 
-    // Pastikan status valid
     if (!in_array($status, ['selesai', 'batal'])) {
         return response()->json([
             'message' => 'Status tidak valid. Gunakan ?status=selesai atau ?status=batal'
         ], 400);
     }
 
-    // Base query
     $query = DB::table('order_items')
         ->join('orders', 'order_items.order_id', '=', 'orders.id')
         ->join('products', 'order_items.product_id', '=', 'products.id')
@@ -229,7 +227,6 @@ class OrderController extends Controller
         ->groupBy('products.name')
         ->orderByDesc('total_sold');
 
-    // === Filter tanggal ===
     if (!empty($dateFilter)) {
         if ($dateFilter === 'today') {
             $query->whereDate('orders.created_at', Carbon::today());
@@ -245,14 +242,12 @@ class OrderController extends Controller
         }
     }
 
-    // === Summary total (tanpa pagination) ===
     $summary = (clone $query)->get();
     $totals = [
         'total_items_sold' => $summary->sum('total_sold'),
         'total_revenue' => $summary->sum('total_revenue'),
     ];
 
-    // === Pagination ===
     $reports = $query->paginate(10);
 
     return response()->json([

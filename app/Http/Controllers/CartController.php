@@ -19,20 +19,37 @@ class CartController extends Controller
         return view('cart');
     }
 
-   
+    private function getCookieData(Request $request): array
+    {
+        return json_decode($request->cookie($this->cookieName), true) ?? [];
+    }
+
+    private function getActiveCartIndex(array $cookieData)
+    {
+        return collect($cookieData)->search(fn ($c) => $c['is_order'] === false);
+    }
+
+    private function buildCookie(array $data)
+    {
+        return cookie(
+            $this->cookieName,
+            json_encode(array_values($data)),
+            $this->cookieTime
+        );
+    }
+
     public function getData(Request $request)
     {
         $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
         $activeCart = collect($cookieData)->firstWhere('is_order', false);
         return response()->json($activeCart ?? ['is_order' => false, 'cart' => []]);
     }
-
-    
     public function addOrUpdate(Request $request)
     {
-        $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
+        $cookieData = $this->getCookieData($request);
 
-        $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
+        $activeCartIndex = $this->getActiveCartIndex($cookieData);
+
         if ($activeCartIndex === false) {
             $activeCartIndex = count($cookieData);
             $cookieData[] = ['is_order' => false, 'cart' => []];
@@ -42,19 +59,22 @@ class CartController extends Controller
 
         $newItem = [
             'product_id' => $request->product_id,
-            'nama' => $request->nama,
-            'qty' => (int) $request->qty,
-            'harga' => (int) $request->harga,
-            'desc' => $request->desc ?? "",
+            'nama'       => $request->nama,
+            'qty'        => (int) $request->qty,
+            'harga'      => (int) $request->harga,
+            'desc'       => $request->desc ?? "",
         ];
 
         $found = false;
+
         foreach ($cart as &$item) {
             if ($item['product_id'] == $newItem['product_id']) {
                 $item['qty'] += $newItem['qty'];
+
                 if (!empty($newItem['desc'])) {
                     $item['desc'] = $newItem['desc'];
                 }
+
                 $item['harga'] = $newItem['harga'];
                 $found = true;
                 break;
@@ -65,46 +85,139 @@ class CartController extends Controller
             $cart[] = $newItem;
         }
 
-        $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
         return response()->json([
-            'message' => $found ? 'Item diperbarui di cart' : 'Item ditambahkan ke cart',
+            'message' => $found
+                ? 'Item diperbarui di cart'
+                : 'Item ditambahkan ke cart',
             'cart' => $cart,
-        ])->cookie($cookie);
+        ])->cookie(
+            $this->buildCookie($cookieData)
+        );
     }
+
+    
+    // old ==========
+    // public function addOrUpdate(Request $request)
+    // {
+    //     $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
+
+    //     $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
+    //     if ($activeCartIndex === false) {
+    //         $activeCartIndex = count($cookieData);
+    //         $cookieData[] = ['is_order' => false, 'cart' => []];
+    //     }
+
+    //     $cart = &$cookieData[$activeCartIndex]['cart'];
+
+    //     $newItem = [
+    //         'product_id' => $request->product_id,
+    //         'nama' => $request->nama,
+    //         'qty' => (int) $request->qty,
+    //         'harga' => (int) $request->harga,
+    //         'desc' => $request->desc ?? "",
+    //     ];
+
+    //     $found = false;
+    //     foreach ($cart as &$item) {
+    //         if ($item['product_id'] == $newItem['product_id']) {
+    //             $item['qty'] += $newItem['qty'];
+    //             if (!empty($newItem['desc'])) {
+    //                 $item['desc'] = $newItem['desc'];
+    //             }
+    //             $item['harga'] = $newItem['harga'];
+    //             $found = true;
+    //             break;
+    //         }
+    //     }
+
+    //     if (!$found) {
+    //         $cart[] = $newItem;
+    //     }
+
+    //     $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
+    //     return response()->json([
+    //         'message' => $found ? 'Item diperbarui di cart' : 'Item ditambahkan ke cart',
+    //         'cart' => $cart,
+    //     ])->cookie($cookie);
+    // }
 
     
     public function remove(Request $request, $id)
     {
-        $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
+        $cookieData = $this->getCookieData($request);
 
-        $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
+        $activeCartIndex = $this->getActiveCartIndex($cookieData);
+
         if ($activeCartIndex === false) {
             return response()->json(['message' => 'Cart kosong'], 400);
         }
 
-        $cookieData[$activeCartIndex]['cart'] = array_values(array_filter(
-            $cookieData[$activeCartIndex]['cart'],
-            fn($item) => $item['product_id'] != $id
-        ));
+        $cookieData[$activeCartIndex]['cart'] = array_values(
+            array_filter(
+                $cookieData[$activeCartIndex]['cart'],
+                fn ($item) => $item['product_id'] != $id
+            )
+        );
 
-        $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
         return response()->json([
             'message' => 'Item dihapus dari keranjang',
-            'cart' => $cookieData[$activeCartIndex]['cart']
-        ])->cookie($cookie);
+            'cart'    => $cookieData[$activeCartIndex]['cart'],
+        ])->cookie(
+            $this->buildCookie($cookieData)
+        );
     }
 
-    
+    // old ==================
+    // public function remove(Request $request, $id)
+    // {
+    //     $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
+
+    //     $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
+    //     if ($activeCartIndex === false) {
+    //         return response()->json(['message' => 'Cart kosong'], 400);
+    //     }
+
+    //     $cookieData[$activeCartIndex]['cart'] = array_values(array_filter(
+    //         $cookieData[$activeCartIndex]['cart'],
+    //         fn($item) => $item['product_id'] != $id
+    //     ));
+
+    //     $cookie = cookie($this->cookieName, json_encode($cookieData), $this->cookieTime);
+    //     return response()->json([
+    //         'message' => 'Item dihapus dari keranjang',
+    //         'cart' => $cookieData[$activeCartIndex]['cart']
+    //     ])->cookie($cookie);
+    // }
+
     public function clear(Request $request)
     {
-        $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
-        $cookieData = array_filter($cookieData, fn($c) => $c['is_order'] === true);
+        $cookieData = $this->getCookieData($request);
+
+        $cookieData = array_filter(
+            $cookieData,
+            fn ($c) => $c['is_order'] === true
+        );
 
         $cookieData[] = ['is_order' => false, 'cart' => []];
 
-        $cookie = cookie($this->cookieName, json_encode(array_values($cookieData)), $this->cookieTime);
-        return response()->json(['message' => 'Cart dikosongkan'])->cookie($cookie);
+        return response()->json([
+            'message' => 'Cart dikosongkan'
+        ])->cookie(
+            $this->buildCookie($cookieData)
+        );
     }
+
+    // old ==================
+    // public function clear(Request $request)
+    // {
+    //     $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
+    //     $cookieData = array_filter($cookieData, fn($c) => $c['is_order'] === true);
+
+    //     $cookieData[] = ['is_order' => false, 'cart' => []];
+
+    //     $cookie = cookie($this->cookieName, json_encode(array_values($cookieData)), $this->cookieTime);
+    //     return response()->json(['message' => 'Cart dikosongkan'])->cookie($cookie);
+    // }
 
     
     public function placeOrder(Request $request)
@@ -112,7 +225,7 @@ class CartController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'table_number' => 'required|string|max:20',
+            'qr_code_id' => 'required|string',
         ]);
         $cookieData = json_decode($request->cookie($this->cookieName), true) ?? [];
         $activeCartIndex = collect($cookieData)->search(fn($c) => $c['is_order'] === false);
@@ -133,7 +246,8 @@ class CartController extends Controller
             'order_code' => 'ORD-' . strtoupper(Str::random(6)),
             'name' => $request->name,
             'phone' => $request->phone,
-            'table_number' => $request->table_number,
+            'qr_code_id' => $request->qr_code_id,
+            'table_number' => "",
             'total_price' => $totalPrice,
             'payment_method' => "cash",
             'status' => 'menunggu',

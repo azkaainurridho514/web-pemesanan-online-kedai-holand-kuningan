@@ -25,9 +25,9 @@
                             <button id="btnFilterSelesai" class="btn btn-secondary">
                                 <i data-feather="filter"></i> Terapkan
                             </button>
-                            <button id="btnDownloadSelesai" class="btn btn-primary">
+                            {{-- <button id="btnDownloadSelesai" class="btn btn-primary">
                                 <i data-feather="download"></i> Download Penjualan
-                            </button>
+                            </button> --}}
                         </div>
                     </div>
                
@@ -67,9 +67,9 @@
                         <button id="btnFilterBatal" class="btn btn-secondary">
                             <i data-feather="filter"></i> Terapkan
                         </button>
-                        <button id="btnDownloadBatal" class="btn btn-primary">
+                        {{-- <button id="btnDownloadBatal" class="btn btn-primary">
                             <i data-feather="download"></i> Download Pembatalan
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -93,7 +93,6 @@
 <script>
 $(document).ready(function () {
 
-    // ----------------- CARD SELESAI -----------------
     $('#selectPeriodSelesai').on('change', function () {
         toggleDateFields('Selesai', $(this).val());
     });

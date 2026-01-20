@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary(); 
+            $table->uuid('qr_code_id');
             $table->string('order_code')->unique(); 
             $table->string('name'); 
             $table->string('phone'); 

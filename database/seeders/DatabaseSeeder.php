@@ -247,62 +247,62 @@ class DatabaseSeeder extends Seeder
 
 
 
-        $products = Product::where('is_available', true)->get();
-        $statuses = ['menunggu', 'diproses', 'dihidangkan', 'selesai', 'batal'];
-        $payments = ['cash', 'transfer'];
+        // $products = Product::where('is_available', true)->get();
+        // $statuses = ['menunggu', 'diproses', 'dihidangkan', 'selesai', 'batal'];
+        // $payments = ['cash', 'transfer'];
 
-        for ($i = 0; $i < 120; $i++) {
-            // Buat tanggal acak antara 30 hari lalu - sekarang
-            $createdAt = fake()->dateTimeBetween('-30 days', 'now');
+        // for ($i = 0; $i < 120; $i++) {
+        //     // Buat tanggal acak antara 30 hari lalu - sekarang
+        //     $createdAt = fake()->dateTimeBetween('-30 days', 'now');
 
-            // Data pesanan
-            $name = fake()->name();
-            $phone = fake()->phoneNumber();
-            $table = fake()->numberBetween(1, 20);
-            $payment = fake()->randomElement($payments);
-            $status = fake()->randomElement($statuses);
+        //     // Data pesanan
+        //     $name = fake()->name();
+        //     $phone = fake()->phoneNumber();
+        //     $table = fake()->numberBetween(1, 20);
+        //     $payment = fake()->randomElement($payments);
+        //     $status = fake()->randomElement($statuses);
 
-            $order = Order::create([
-                'id' => Str::uuid(),
-                'order_code' => 'ORD-' . strtoupper(Str::random(6)),
-                'name' => $name,
-                'phone' => $phone,
-                'table_number' => $table,
-                'total_price' => 0, // dihitung nanti
-                'payment_method' => $payment,
-                'status' => $status,
-                'completed_at' => $status === 'selesai' 
-                    ? Carbon::parse($createdAt)->addMinutes(rand(10, 120)) 
-                    : null,
-                'created_at' => $createdAt,
-                'updated_at' => $createdAt,
-            ]);
+        //     $order = Order::create([
+        //         'id' => Str::uuid(),
+        //         'order_code' => 'ORD-' . strtoupper(Str::random(6)),
+        //         'name' => $name,
+        //         'phone' => $phone,
+        //         'table_number' => $table,
+        //         'total_price' => 0, // dihitung nanti
+        //         'payment_method' => $payment,
+        //         'status' => $status,
+        //         'completed_at' => $status === 'selesai' 
+        //             ? Carbon::parse($createdAt)->addMinutes(rand(10, 120)) 
+        //             : null,
+        //         'created_at' => $createdAt,
+        //         'updated_at' => $createdAt,
+        //     ]);
 
-            // Tambahkan item pesanan acak
-            $items = $products->random(rand(2, 5));
-            $total = 0;
+        //     // Tambahkan item pesanan acak
+        //     $items = $products->random(rand(2, 5));
+        //     $total = 0;
 
-            foreach ($items as $product) {
-                $qty = rand(1, 3);
-                $subtotal = $qty * $product->price;
+        //     foreach ($items as $product) {
+        //         $qty = rand(1, 3);
+        //         $subtotal = $qty * $product->price;
 
-                OrderItem::create([
-                    'id' => Str::uuid(),
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $qty,
-                    'subtotal' => $subtotal,
-                    'note' => fake()->boolean(30) ? fake()->sentence() : null,
-                    'created_at' => $createdAt,
-                    'updated_at' => $createdAt,
-                ]);
+        //         OrderItem::create([
+        //             'id' => Str::uuid(),
+        //             'order_id' => $order->id,
+        //             'product_id' => $product->id,
+        //             'quantity' => $qty,
+        //             'subtotal' => $subtotal,
+        //             'note' => fake()->boolean(30) ? fake()->sentence() : null,
+        //             'created_at' => $createdAt,
+        //             'updated_at' => $createdAt,
+        //         ]);
 
-                $total += $subtotal;
-            }
+        //         $total += $subtotal;
+        //     }
 
-            // Update total harga
-            $order->update(['total_price' => $total]);
-        }
+        //     // Update total harga
+        //     $order->update(['total_price' => $total]);
+        // }
         echo "Seeder sukses: urutan produk diacak, 22 tanpa opsi, 25 non-available ✅\n";
 
 

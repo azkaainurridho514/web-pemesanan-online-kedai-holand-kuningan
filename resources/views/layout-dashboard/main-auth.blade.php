@@ -16,27 +16,6 @@
 
 	<title>@yield('title')</title>
 	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
 
 	<link href="{{ asset("adminkit-dev-old/static/css/app.css") }}" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -49,10 +28,15 @@
 	<script>
 	$(document).ready(function() {
 		$.ajaxSetup({
-			headers: {
-				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		});
+				headers: {
+					'X-CSRF-TOKEN': document
+						.querySelector('meta[name="csrf-token"]')
+						.getAttribute('content')
+				},
+				xhrFields: {
+					withCredentials: true
+				}
+			});
 	});
 	</script>
 	@stack('stack-auth')

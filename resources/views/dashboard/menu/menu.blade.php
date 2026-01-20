@@ -367,75 +367,6 @@ $(document).ready(function () {
         });
     });
 
-    // $(document).on('click', '#btnSaveMenu', function(e) {
-    //     e.preventDefault();
-
-    //     const id = $('#menuId').val();
-    //     const name = $('#menuName').val().trim();
-    //     const category = $('#menuCategory').val();
-    //     const option = $('#menuOption').val();
-    //     const desc = $('#menuDesc').val();
-    //     const price = $('#menuPrice').val();
-    //     const photoFile = $('#menuPhoto')[0].files[0]; 
-    //     const status = $('#menuStatus').val();
-
-    //     if (!name || !category || !price || !status) {
-    //         Swal.fire({
-    //             icon: 'warning',
-    //             title: 'Data belum lengkap',
-    //             text: 'Semua field wajib diisi kecuali Opsi.',
-    //             confirmButtonText: 'OK',
-    //             confirmButtonColor: '#3085d6'
-    //         });
-    //         return;
-    //     }
-
-    //     $.ajax({
-    //         url: `/api/update-data/product/${id}`,
-    //         method: 'PUT',
-    //         data: {
-    //             name: name,
-    //             category_id: category,
-    //             option_id: option || "", 
-    //             price: price,
-    //             photo: photo,
-    //             description: desc || "",
-    //             is_available: status,
-    //             _token: $('meta[name="csrf-token"]').attr('content')
-    //         },
-    //         beforeSend: function() {
-    //             $('#btnSaveMenu')
-    //                 .prop('disabled', true)
-    //                 .html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-    //         },
-    //         success: function(res) {
-    //             $('#modalMenu').modal('hide');
-    //             Swal.fire({
-    //                 icon: 'success',
-    //                 title: 'Berhasil!',
-    //                 text: 'Data menu berhasil diperbarui.',
-    //                 timer: 2000,
-    //                 showConfirmButton: false
-    //             });
-
-    //             loadProducts(); 
-    //         },
-    //         error: function(err) {
-    //             console.log(err)
-    //             Swal.fire({
-    //                 icon: 'error',
-    //                 title: 'Gagal!',
-    //                 text: 'Terjadi kesalahan saat menyimpan data.',
-    //                 confirmButtonText: 'Coba Lagi'
-    //             });
-    //         },
-    //         complete: function() {
-    //             $('#btnSaveMenu')
-    //                 .prop('disabled', false)
-    //                 .html('Simpan');
-    //         }
-    //     });
-    // });
 
     $(document).on('click', '#btnSaveMenu', function(e) {
         e.preventDefault();
@@ -480,7 +411,7 @@ $(document).ready(function () {
             processData: false, 
             contentType: false, 
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                // 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             beforeSend: function() {
                 $('#btnSaveMenu')
@@ -636,7 +567,7 @@ $(document).ready(function () {
         const option = $('#menuOption').val();
         const desc = $('#menuDesc').val();
         const price = $('#menuPrice').val();
-        const photo = $('#menuPhoto').val();
+        const photoFile = $('#menuPhoto')[0].files[0];
         const status = $('#menuStatus').val();
 
         if (!name || !category || !price || status === '') {
@@ -650,16 +581,19 @@ $(document).ready(function () {
             return;
         }
 
-        const data = {
-            name: name,
-            category_id: category,
-            option_id: option || "",
-            price: price,
-            photo: photo,
-            description: desc || "",
-            is_available: status
-        };
-        console.log(data)
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('category_id', category);
+        formData.append('option_id', option || "");
+        formData.append('price', price);
+        formData.append('description', desc || "");
+        formData.append('is_available', status);
+        formData.append('_method', 'POST'); 
+        
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
+        console.log(formData)
         
 
         $('#btnSaveNewMenu').prop('disabled', true).text('Menyimpan...');
@@ -667,7 +601,12 @@ $(document).ready(function () {
         $.ajax({
             url: '/api/create-data/product',
             type: 'POST',
-            data: data,
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            headers: {
+                // 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             success: function(res) {
                 Swal.fire({
                     icon: 'success',

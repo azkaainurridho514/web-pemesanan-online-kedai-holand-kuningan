@@ -11,9 +11,9 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\QrcodeController;
 use App\Events\OrderEvent;
 use App\Http\Controllers\OrderExportController;
-
 Route::get('/', [HomeController::class, "index"]);
 Route::get('/cart', [HomeController::class, "cart"]);
 Route::middleware(['guest'])->group(function () {
@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('history', [OrderController::class, 'reportView']);
         Route::get('menu', [MenuController::class, 'menuView']);
         Route::get('category', [MenuController::class, 'categoryView']);
+        Route::get('qrcode', [QrcodeController::class, 'index']);
         Route::get('user', [UserController::class, 'userView']);
         Route::get('option', [MenuController::class, 'optionView']);
     });

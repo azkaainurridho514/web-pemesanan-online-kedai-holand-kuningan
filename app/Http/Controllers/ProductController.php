@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Option;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage; 
 
 class ProductController extends Controller
@@ -109,7 +110,9 @@ class ProductController extends Controller
             }
             
             $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            
+            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+            
             $file->storeAs('product', $filename, 'public');
             $validated['photo'] = $filename;
         }
@@ -135,7 +138,9 @@ class ProductController extends Controller
 
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            
+            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+            
             $file->storeAs('product', $filename, 'public');
             $validated['photo'] = $filename;
         }

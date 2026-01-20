@@ -534,7 +534,7 @@
                 method: 'PUT',
                 data: {
                     status: status,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    // _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 beforeSend: function() {
                     $('#formUpdateStatus button[type=submit]').prop('disabled', true).text('Menyimpan...');
@@ -810,7 +810,7 @@
                 phone: phone,
                 table_number: table_number,
                 products: products,
-                _token: '{{ csrf_token() }}'
+                // _token: '{{ csrf_token() }}'
             };
 
             let isEdit = id !== "" && id !== null;

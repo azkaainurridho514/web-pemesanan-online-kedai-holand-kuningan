@@ -51,6 +51,11 @@
                         <i class="align-middle" data-feather="git-commit"></i> <span class="align-middle">Option</span>
                     </a>
                 </li>
+                <li class="sidebar-item {{ request()->is('admin/qrcode*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="/admin/qrcode">
+                        <i class="align-middle" data-feather="code"></i> <span class="align-middle">Qr Code</span>
+                    </a>
+                </li>
             {{-- <li class="sidebar-header">
                 ADDITIONAL HOME PAGE
             </li>

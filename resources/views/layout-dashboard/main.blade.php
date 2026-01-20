@@ -96,9 +96,15 @@
 			// jQuery AJAX CSRF setup
 			$.ajaxSetup({
 				headers: {
-					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+					'X-CSRF-TOKEN': document
+						.querySelector('meta[name="csrf-token"]')
+						.getAttribute('content')
+				},
+				xhrFields: {
+					withCredentials: true
 				}
 			});
+
 			document.addEventListener("DOMContentLoaded", function() {
 				Echo.channel(`order-event`)
 				.listen('OrderEvent', (e) => {

@@ -49,6 +49,7 @@
 
         </style>
         @vite('resources/css/app.css')
+        @stack('styles')
 	</head>
     <body>
         <section class="menu-area section-gap" id="coffee">
